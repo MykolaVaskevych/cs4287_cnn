@@ -1,1 +1,15 @@
-# cs4287_cnn
+```bash
+# Install UV
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Sync dependencies
+uv sync
+
+# Run Marimo
+uv run marimo edit main.py
+```
+
+
+if you need to install dependencies:
+```bash
+uv add 'NAME'
+```
