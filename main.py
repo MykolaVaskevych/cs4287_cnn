@@ -8,6 +8,12 @@ app = marimo.App(
 )
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""# Imports""")
+    return
+
+
 @app.cell
 def _():
     import marimo as mo
@@ -16,126 +22,139 @@ def _():
 
 @app.cell
 def _():
-    print("hello world")
-    return
-
-
-@app.cell
-def _():
-    # # CS4287-CNN
-    # Names: MYKOLA VASKEVYCH(22372199), Teammate Name (ID2)
-    # Code executes to completion: YES
-
-    import os
+    import random
     import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
     import cv2
     from pathlib import Path
     import numpy as np
     from ultralytics import YOLO
-    return Path, YOLO, cv2, np, plt
+    import yaml
+    from collections import Counter, defaultdict
+    from bokeh.plotting import figure, show, output_notebook
+    from bokeh.layouts import column
+    from PIL import Image
+    import torch
+    return (
+        Counter,
+        Image,
+        Path,
+        YOLO,
+        column,
+        cv2,
+        defaultdict,
+        figure,
+        mpimg,
+        np,
+        output_notebook,
+        plt,
+        random,
+        show,
+        torch,
+    )
 
 
-@app.cell
-def _(Path):
-    print(Path.cwd())
-    return
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+    # CS4287-CNN: Construction Safety Equipment Detection
 
+    **Authors**: MYKOLA VASKEVYCH (22372199), Teammate Name (ID2)
 
-@app.cell
-def _(Path):
-    # Set your dataset path
+    **Status**: Code executes to completion: YES
+
+    ## Overview
+    This notebook fine-tunes a YOLOv8 nano model to detect Personal Protective Equipment (PPE)
+    violations on construction sites. The model identifies safety equipment (hardhats, masks,
+    safety vests) and flags violations when workers lack proper protection.
+
+    ## Dataset
+    - **Classes**: 10 (Hardhat, Mask, NO-Hardhat, NO-Mask, NO-Safety Vest, Person, Safety Cone, Safety Vest, machinery, vehicle)
+    - **Format**: YOLO format with normalized bounding boxes
+    - **Splits**: Train/Validation/Test
+
+    ## Quick Start
+    1. Ensure dataset is in `data/archive/css-data/` directory
+    2. Run all cells sequentially (training will not start automatically)
+    3. Review dataset statistics and quality
+    4. Click "Train Model" button when ready to train
+    5. Scroll down to see training results and model comparison
     """
-    [nick@archlinux css-data]$ pwd
-    /home/nick/Documents/projects/uni_stuff/cnn/cs4287_cnn/data/archive/css-data
-    [nick@archlinux css-data]$ ls
-    README.dataset.txt  README.roboflow.txt  test  train  valid
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    # CHECKS & SETTINGS
+    ## NOTE: CHECK CONSTANTS BELOW TO ENSURE CORRECTNESS BEFORE RUNNING THE NOTEBOOK.
     """
-
-    dataset_path = Path.cwd() / "data" / "archive" / "css-data"
-
-    # Section 1: Understanding Dataset Structure
-    print("=" * 50)
-    print("DATASET STRUCTURE")
-    print("=" * 50)
-
-    # Count files in each split
-    for _split in ["train", "valid", "test"]:
-        img_path = Path(dataset_path) / _split / "images"
-        _label_path = Path(dataset_path) / _split / "labels"
-
-        num_images = len(list(img_path.glob("*.jpg")))
-        num_labels = len(list(_label_path.glob("*.txt")))
-
-        print(f"{_split.upper():10s}: {num_images} images, {num_labels} labels")
-    return (dataset_path,)
-
-
-@app.cell
-def _(Path, dataset_path):
-    # Section 2: Examine Label Format
-    print("\n" + "=" * 50)
-    print("SAMPLE LABEL FILE")
-    print("=" * 50)
-
-    # Get first training label file
-    label_files = list((Path(dataset_path) / "train" / "labels").glob("*.txt"))
-    first_label = label_files[0]
-
-    print(f"\nLabel file: {first_label.name}")
-    print("\nContents (first 10 lines):")
-    with open(first_label, "r") as _f:
-        lines = _f.readlines()[:10]  # Read first 10 lines
-        for i, _line in enumerate(lines, 1):
-            print(f"  {i}. {_line.strip()}")
-
-    print(f"\nTotal objects in this image: {len(lines)}")
-    print("\nFormat: class_id x_center y_center width height")
-    print("(All values normalized between 0 and 1)")
+    )
     return
 
 
 @app.cell
-def _(Path, dataset_path):
-    # Section 3: Discover Class Names
-    print("\n" + "=" * 50)
-    print("CLASS DISCOVERY")
-    print("=" * 50)
-
-    from collections import Counter
-
-    # Collect all class IDs from all label files
-    all_class_ids = []
-
-    for _split in ["train", "valid", "test"]:
-        _label_path = Path(dataset_path) / _split / "labels"
-
-        for label_file in _label_path.glob("*.txt"):
-            with open(label_file, "r") as _f:
-                for _line in _f:
-                    parts = _line.strip().split()
-                    if parts:  # If line is not empty
-                        class_id = int(parts[0])
-                        all_class_ids.append(class_id)
-
-    # Count occurrences of each class
-    class_counts = Counter(all_class_ids)
-
-    print(f"\nTotal objects across all images: {len(all_class_ids)}")
-    print(f"Number of unique classes: {len(class_counts)}")
-    print("\nClass distribution:")
-    for class_id in sorted(class_counts.keys()):
-        count = class_counts[class_id]
-        percentage = (count / len(all_class_ids)) * 100
-        print(f"  Class {class_id}: {count:5d} objects ({percentage:5.2f}%)")
-    return
+def _(Path, np, random, torch):
+    DO_YOU_HAVE_YAML_FILE = True
 
 
-@app.cell
-def _(cv2, dataset_path, plt):
-    # TODO: REPLACE with yaml file?? or leave like that?
+    # Reproducibility
+    RANDOM_SEED = 42
+    random.seed(RANDOM_SEED)
+    np.random.seed(RANDOM_SEED)
+    torch.manual_seed(RANDOM_SEED)
 
-    # Class names
-    _class_names = {
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(RANDOM_SEED)
+
+    # Auto-detect best available device
+    if torch.cuda.is_available():
+        DEVICE = 0
+        _device_name = torch.cuda.get_device_name(0)
+        _vram_gb = torch.cuda.get_device_properties(0).total_memory / 1024**3
+        print(f"GPU detected: {_device_name} ({_vram_gb:.1f}GB VRAM)")
+        print(f"Recommended BATCH_SIZE: {16 if _vram_gb >= 8 else 8}")
+    else:
+        DEVICE = "cpu"
+        print("⚠ No GPU detected - training will be significantly slower")
+        print("Recommended: Reduce EPOCHS to 10 and BATCH_SIZE to 4 for CPU")
+
+    # Dataset paths
+    DATASET_ROOT = Path.cwd() / "data" / "archive" / "css-data"
+    TRAINING_IMAGES_PATH = (DATASET_ROOT / "train" / "images").resolve()
+    TRAINING_LABELS_PATH = (DATASET_ROOT / "train" / "labels").resolve()
+    VALIDATION_IMAGES_PATH = (DATASET_ROOT / "valid" / "images").resolve()
+    VALIDATION_LABELS_PATH = (DATASET_ROOT / "valid" / "labels").resolve()
+    TEST_IMAGES_PATH = (DATASET_ROOT / "test" / "images").resolve()
+    TEST_LABELS_PATH = (DATASET_ROOT / "test" / "labels").resolve()
+    YAML_CONFIG_PATH = DATASET_ROOT / "data.yaml"
+
+    # Model paths
+    PRETRAINED_MODEL_PATH = "yolov8n.pt"
+    TRAINING_OUTPUT_DIR = "runs/train"
+    TRAINING_RUN_NAME = "ppe_detection"
+    TRAINED_MODEL_PATH = (
+        Path(TRAINING_OUTPUT_DIR) / TRAINING_RUN_NAME / "weights" / "best.pt"
+    )
+
+    # Training parameters
+    EPOCHS = 50  # Reduce to 10 for quick testing or CPU training
+    IMAGE_SIZE = 640  # YOLO standard input size
+    BATCH_SIZE = 16  # Reduce to 4-8 for low VRAM or CPU
+
+    # Detection parameters
+    CONFIDENCE_THRESHOLD = 0.25  # Minimum confidence for detections (0.0-1.0)
+
+    # Visualization parameters
+    NUM_SAMPLE_IMAGES = 6
+    NUM_COMPARISON_IMAGES = 4
+    NUM_BASELINE_TEST_SAMPLES = 3
+
+    # Class definitions
+    CLASS_NAMES = {
         0: "Hardhat",
         1: "Mask",
         2: "NO-Hardhat",
@@ -148,40 +167,285 @@ def _(cv2, dataset_path, plt):
         9: "vehicle",
     }
 
-    # Colors for each class (BGR format for OpenCV)
-    _colors = {
-        0: (0, 255, 0),  # Hardhat - Green
-        1: (255, 255, 0),  # Mask - Cyan
-        2: (0, 0, 255),  # NO-Hardhat - Red
-        3: (0, 0, 255),  # NO-Mask - Red
-        4: (0, 0, 255),  # NO-Safety Vest - Red
-        5: (255, 0, 255),  # Person - Magenta
-        6: (0, 165, 255),  # Safety Cone - Orange
-        7: (0, 255, 0),  # Safety Vest - Green
+    # Bounding box colors (BGR format for OpenCV)
+    BBOX_COLORS = {
+        0: (0, 255, 0),      # Hardhat - Green
+        1: (255, 255, 0),    # Mask - Cyan
+        2: (0, 0, 255),      # NO-Hardhat - Red
+        3: (0, 0, 255),      # NO-Mask - Red
+        4: (0, 0, 255),      # NO-Safety Vest - Red
+        5: (255, 0, 255),    # Person - Magenta
+        6: (0, 165, 255),    # Safety Cone - Orange
+        7: (0, 255, 0),      # Safety Vest - Green
         8: (128, 128, 128),  # machinery - Gray
-        9: (255, 0, 0),  # vehicle - Blue
+        9: (255, 0, 0),      # vehicle - Blue
+    }
+    return (
+        BATCH_SIZE,
+        BBOX_COLORS,
+        CLASS_NAMES,
+        CONFIDENCE_THRESHOLD,
+        DATASET_ROOT,
+        DEVICE,
+        DO_YOU_HAVE_YAML_FILE,
+        EPOCHS,
+        IMAGE_SIZE,
+        NUM_BASELINE_TEST_SAMPLES,
+        NUM_COMPARISON_IMAGES,
+        NUM_SAMPLE_IMAGES,
+        PRETRAINED_MODEL_PATH,
+        TEST_IMAGES_PATH,
+        TRAINED_MODEL_PATH,
+        TRAINING_IMAGES_PATH,
+        TRAINING_LABELS_PATH,
+        TRAINING_OUTPUT_DIR,
+        TRAINING_RUN_NAME,
+        VALIDATION_IMAGES_PATH,
+        YAML_CONFIG_PATH,
+    )
+
+
+@app.cell
+def _(
+    BATCH_SIZE,
+    CONFIDENCE_THRESHOLD,
+    DATASET_ROOT,
+    DEVICE,
+    EPOCHS,
+    IMAGE_SIZE,
+    TEST_IMAGES_PATH,
+    TRAINING_IMAGES_PATH,
+    VALIDATION_IMAGES_PATH,
+    mo,
+):
+    # Validate dataset structure exists
+    _missing_paths = []
+    _paths_to_check = {
+        "Dataset root": DATASET_ROOT,
+        "Training images": TRAINING_IMAGES_PATH,
+        "Validation images": VALIDATION_IMAGES_PATH,
+        "Test images": TEST_IMAGES_PATH,
     }
 
+    for _name, _path in _paths_to_check.items():
+        if not _path.exists():
+            _missing_paths.append(f"- {_name}: `{_path}`")
 
+    if _missing_paths:
+        _error_msg = "**ERROR: Missing required paths:**\n\n" + "\n".join(_missing_paths)
+        _error_msg += "\n\n**Please ensure dataset is extracted to the correct location.**"
+        mo.stop(True, mo.md(_error_msg))
+
+    print("✓ All dataset paths validated successfully\n")
+
+    # Display configuration summary
+    mo.md(
+        f"""
+        ## Current Configuration
+
+        | Parameter | Value | Description |
+        |-----------|-------|-------------|
+        | Device | `{DEVICE}` | Training device (0=GPU, 'cpu'=CPU) |
+        | Epochs | `{EPOCHS}` | Training iterations through dataset |
+        | Image Size | `{IMAGE_SIZE}px` | Input resolution |
+        | Batch Size | `{BATCH_SIZE}` | Images per training step |
+        | Confidence | `{CONFIDENCE_THRESHOLD}` | Min score for detections |
+
+        **Note**: Adjust BATCH_SIZE in constants cell if you get OOM (Out of Memory) errors.
+        """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Dataset Configuration
+
+    Generate YOLO-compatible data.yaml configuration file and verify dataset structure.
+    """
+    )
+    return
+
+
+@app.cell
+def _(
+    CLASS_NAMES,
+    DATASET_ROOT,
+    DO_YOU_HAVE_YAML_FILE,
+    TEST_IMAGES_PATH,
+    TRAINING_IMAGES_PATH,
+    VALIDATION_IMAGES_PATH,
+    YAML_CONFIG_PATH,
+):
+    # Generate YAML using CLASS_NAMES constant to ensure consistency
+    _names_yaml = "\n      ".join([f"{k}: {v}" for k, v in CLASS_NAMES.items()])
+
+    _yaml_content = f"""path: {DATASET_ROOT.resolve()}
+    train: train/images
+    val: valid/images
+    test: test/images
+
+    nc: {len(CLASS_NAMES)}
+    names:
+      {_names_yaml}
+    """
+
+    # Only update YAML if it doesn't exist or content differs
+
+
+    if not DO_YOU_HAVE_YAML_FILE:
+        with open(YAML_CONFIG_PATH, "w") as _f:
+            _f.write(_yaml_content)
+        print("Updated data.yaml:")
+        print(_yaml_content)
+
+    print("\nVerifying paths:")
+    print(f"Train exists: {TRAINING_IMAGES_PATH.exists()}")
+    print(f"Val exists: {VALIDATION_IMAGES_PATH.exists()}")
+    print(f"Test exists: {TEST_IMAGES_PATH.exists()}")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Dataset Structure Analysis
+
+    Examine the distribution of images and labels across train/validation/test splits.
+    """
+    )
+    return
+
+
+@app.cell
+def _(DATASET_ROOT):
+    print("=" * 50)
+    print("DATASET STRUCTURE")
+    print("=" * 50)
+
+    for _split in ["train", "valid", "test"]:
+        _img_path = DATASET_ROOT / _split / "images"
+        _label_path = DATASET_ROOT / _split / "labels"
+
+        _num_images = len(list(_img_path.glob("*.jpg")))
+        _num_labels = len(list(_label_path.glob("*.txt")))
+
+        print(f"{_split.upper():10s}: {_num_images} images, {_num_labels} labels")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Label Format Inspection
+
+    YOLO format uses: `class_id x_center y_center width height` (normalized 0-1).
+    """
+    )
+    return
+
+
+@app.cell
+def _(TRAINING_LABELS_PATH):
+    print("=" * 50)
+    print("SAMPLE LABEL FILE")
+    print("=" * 50)
+
+    _label_files = list(TRAINING_LABELS_PATH.glob("*.txt"))
+    _first_label = _label_files[0]
+
+    print(f"\nLabel file: {_first_label.name}")
+    print("\nContents (first 10 lines):")
+    with open(_first_label, "r") as _f:
+        _lines = _f.readlines()[:10]
+        for _i, _line in enumerate(_lines, 1):
+            print(f"  {_i}. {_line.strip()}")
+
+    print(f"\nTotal objects in this image: {len(_lines)}")
+    print("\nFormat: class_id x_center y_center width height")
+    print("(All values normalized between 0 and 1)")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Class Distribution Analysis
+
+    Count objects per class across all dataset splits to identify class imbalance.
+    """
+    )
+    return
+
+
+@app.cell
+def _(Counter, DATASET_ROOT):
+    print("=" * 50)
+    print("CLASS DISTRIBUTION")
+    print("=" * 50)
+
+    _all_class_ids = []
+
+    for _split in ["train", "valid", "test"]:
+        _label_path = DATASET_ROOT / _split / "labels"
+
+        for _label_file in _label_path.glob("*.txt"):
+            with open(_label_file, "r") as _f:
+                for _line in _f:
+                    _parts = _line.strip().split()
+                    if _parts:
+                        _class_id = int(_parts[0])
+                        _all_class_ids.append(_class_id)
+
+    _class_counts = Counter(_all_class_ids)
+
+    print(f"\nTotal objects across all images: {len(_all_class_ids)}")
+    print(f"Number of unique classes: {len(_class_counts)}")
+    print("\nClass distribution:")
+    for _class_id in sorted(_class_counts.keys()):
+        _count = _class_counts[_class_id]
+        _percentage = (_count / len(_all_class_ids)) * 100
+        print(f"  Class {_class_id}: {_count:5d} objects ({_percentage:5.2f}%)")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""# Actual Code""")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Sample Images Visualization
+
+    Display training images with ground truth bounding boxes overlaid.
+    """
+    )
+    return
+
+
+@app.cell
+def _(cv2):
     def draw_boxes_on_image(img_path, label_path, class_names, colors):
-        """Draw bounding boxes on image"""
-        # Read image
+        """Draw YOLO bounding boxes on image"""
         _img = cv2.imread(str(img_path))
-        # print(str(img_path))
         _img = cv2.cvtColor(_img, cv2.COLOR_BGR2RGB)
         _h, _w = _img.shape[:2]
-        # print(_h,_w)
 
-        # print(str(label_path))
-
-        # Read labels
         with open(label_path, "r") as _f:
             for _line in _f:
                 _parts = _line.strip().split()
                 if not _parts:
                     continue
 
-                # print(_parts)
                 _class_id = int(_parts[0])
                 _x_center = float(_parts[1])
                 _y_center = float(_parts[2])
@@ -198,7 +462,7 @@ def _(cv2, dataset_path, plt):
                 _color = colors.get(_class_id, (255, 255, 255))
                 cv2.rectangle(_img, (_x1, _y1), (_x2, _y2), _color, 2)
 
-                # Add labelds
+                # Add label
                 _label = class_names.get(_class_id, f"Class {_class_id}")
                 _label_size, _baseline = cv2.getTextSize(
                     _label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2
@@ -222,30 +486,34 @@ def _(cv2, dataset_path, plt):
                 )
 
         return _img
+    return (draw_boxes_on_image,)
 
 
-    # Section 4: Visualize Images with Bounding Boxes
+@app.cell
+def _(
+    BBOX_COLORS,
+    CLASS_NAMES,
+    NUM_SAMPLE_IMAGES,
+    TRAINING_IMAGES_PATH,
+    TRAINING_LABELS_PATH,
+    draw_boxes_on_image,
+    plt,
+):
+
     print("=" * 50)
     print("VISUALIZING SAMPLE IMAGES")
     print("=" * 50)
 
-    _train_img_path = dataset_path / "train" / "images"
-    _train_label_path = dataset_path / "train" / "labels"
-
-    # Get first 6 images
-    _image_files = list(_train_img_path.glob("*.jpg"))[
-        :6
-    ]  # <---------------- some images are bad, check [4:5] (1,2..)
-    # print(_image_files)                                                    |
-    _fig, _axes = plt.subplots(2, 3, figsize=(15, 10))  # <-------------------|
+    _image_files = list(TRAINING_IMAGES_PATH.glob("*.jpg"))[:NUM_SAMPLE_IMAGES]
+    _fig, _axes = plt.subplots(2, 3, figsize=(15, 10))
     _axes = _axes.flatten()
 
     for _idx, _img_file in enumerate(_image_files):
-        _label_file = _train_label_path / (_img_file.stem + ".txt")
+        _label_file = TRAINING_LABELS_PATH / (_img_file.stem + ".txt")
 
         if _label_file.exists():
             _img_with_boxes = draw_boxes_on_image(
-                _img_file, _label_file, _class_names, _colors
+                _img_file, _label_file, CLASS_NAMES, BBOX_COLORS
             )
             _axes[_idx].imshow(_img_with_boxes)
             _axes[_idx].set_title(f"Image: {_img_file.name}", fontsize=10)
@@ -255,8 +523,8 @@ def _(cv2, dataset_path, plt):
     plt.show()
 
     print("\nLegend:")
-    print("  Green boxes: Hardhat, Safety Vest (PPE worn correctly)")
-    print("  Red boxes: NO-Hardhat, NO-Mask, NO-Safety Vest (violations!)")
+    print("  Green: Hardhat, Safety Vest (PPE worn correctly)")
+    print("  Red: NO-Hardhat, NO-Mask, NO-Safety Vest (violations)")
     print("  Magenta: Person")
     print("  Orange: Safety Cone")
     print("  Gray: Machinery")
@@ -264,30 +532,27 @@ def _(cv2, dataset_path, plt):
     return
 
 
-app._unparsable_cell(
-    r"""
-    some images are bad. like white shirt is a west, or blue working vest is not recognized (image 4), or too many people (image 4)
-    """,
-    name="_"
-)
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Data Quality Notes
+
+    Some images have labeling ambiguities: misclassified clothing items or crowded scenes with occlusions.
+    """
+    )
+    return
 
 
 @app.cell
-def _(dataset_path):
+def _(TRAINING_LABELS_PATH, defaultdict):
     print("=" * 50)
     print("DATA QUALITY OBSERVATIONS")
     print("=" * 50)
 
-    # Analyze class co-occurrences to spot issues
-    from collections import defaultdict
-
     _cooccurrence = defaultdict(int)
-    _dataset_path = dataset_path
 
-    # Check train set
-    _train_label_path = _dataset_path / "train" / "labels"
-
-    for _label_file in _train_label_path.glob("*.txt"):
+    for _label_file in TRAINING_LABELS_PATH.glob("*.txt"):
         _classes_in_image = set()
         with open(_label_file, "r") as _f:
             for _line in _f:
@@ -295,8 +560,8 @@ def _(dataset_path):
                 if _parts:
                     _classes_in_image.add(int(_parts[0]))
 
-        # Check for suspicious combinations
-        if 5 in _classes_in_image:  # Person present
+        # Check for suspicious combinations (Person with contradictory PPE states)
+        if 5 in _classes_in_image:
             if 7 in _classes_in_image and 4 in _classes_in_image:
                 _cooccurrence["Person with BOTH vest AND no-vest"] += 1
             if 0 in _classes_in_image and 2 in _classes_in_image:
@@ -309,371 +574,496 @@ def _(dataset_path):
 
 
 @app.cell
-def _():
-    # TRAINING THE MODEL
+def _(mo):
+    mo.md(
+        r"""
+    ## Model Training
+
+    Load pre-trained YOLOv8 model and fine-tune on PPE detection dataset.
+    """
+    )
     return
 
 
 @app.cell
-def _(YOLO):
-    # Load YOLOv8 nano model
-    # Pre-trained on COCO dataset with 80 object classes
-    model = YOLO("yolov8n.pt")
-
-    # Display actual model information
-    model.info()
-    return (model,)
+def _(PRETRAINED_MODEL_PATH, YOLO):
+    # Load YOLOv8 nano model pre-trained on COCO dataset (80 classes)
+    pretrained_model = YOLO(PRETRAINED_MODEL_PATH)
+    pretrained_model.info()
+    return (pretrained_model,)
 
 
 @app.cell
-def _(dataset_path, model):
-    # Section: Test pre-trained model on construction images
+def _(mo):
+    mo.md(
+        r"""
+    ## Baseline Performance
+
+    Test pre-trained COCO model on construction site images to establish baseline detection capabilities.
+    """
+    )
+    return
 
 
-    test_img_path = dataset_path / "train" / "images"
-    test_images = list(test_img_path.glob("*.jpg"))[:3]
+@app.cell
+def _(
+    CONFIDENCE_THRESHOLD,
+    NUM_BASELINE_TEST_SAMPLES,
+    TEST_IMAGES_PATH,
+    pretrained_model,
+):
+    # CRITICAL: Use TEST set for unbiased baseline evaluation
+    pretrained_test_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[:NUM_BASELINE_TEST_SAMPLES]
 
-    # Run inference on 3 images
-    for _img_file in test_images:
-        _results = model.predict(
+    print("Testing pre-trained COCO model on TEST set (unbiased baseline):")
+    for _img_file in pretrained_test_images:
+        _results = pretrained_model.predict(
             source=str(_img_file),
-            conf=0.25,
+            conf=CONFIDENCE_THRESHOLD,
             save=False,
-            verbose=True,  # Show what it actually detects
+            verbose=True,
         )
-
-        # Results object contains actual detections
         _result = _results[0]
-        print(f"\n{_img_file.name}: {len(_result.boxes)} objects detected")
-    return (test_images,)
+        print(f"{_img_file.name}: {len(_result.boxes)} objects detected")
+    return (pretrained_test_images,)
 
 
 @app.cell
-def _(cv2, model, plt, test_images):
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+def _(
+    CONFIDENCE_THRESHOLD,
+    cv2,
+    plt,
+    pretrained_model,
+    pretrained_test_images,
+):
+    _fig, _axes = plt.subplots(1, 3, figsize=(15, 5))
 
-    for idx, img_file in enumerate(test_images):
-        # Run prediction with save=False but get the plotted result
-        _results = model.predict(
-            source=str(img_file), conf=0.25, save=False, verbose=False
+    for _idx, _img_file in enumerate(pretrained_test_images):
+        _results = pretrained_model.predict(
+            source=str(_img_file), conf=CONFIDENCE_THRESHOLD, save=False, verbose=False
         )
 
-        # Get the plotted image with boxes
         _result = _results[0]
-        plotted_img = _result.plot()  # This draws boxes on the image
+        _plotted_img = _result.plot()
+        _plotted_img_rgb = cv2.cvtColor(_plotted_img, cv2.COLOR_BGR2RGB)
 
-        # Convert BGR to RGB for matplotlib
-        plotted_img_rgb = cv2.cvtColor(plotted_img, cv2.COLOR_BGR2RGB)
-
-        axes[idx].imshow(plotted_img_rgb)
-        axes[idx].set_title(f"{img_file.name}\n{len(_result.boxes)} detections")
-        axes[idx].axis("off")
+        _axes[_idx].imshow(_plotted_img_rgb)
+        _axes[_idx].set_title(f"{_img_file.name}\n{len(_result.boxes)} detections")
+        _axes[_idx].axis("off")
 
     plt.tight_layout()
-    plt.show()
+    plt.gca()
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""# detects people, but poorly, not all, and does not detect safety equipment""")
-    return
+    mo.md(
+        r"""
+    ## Training Configuration
 
+    Training progress will be displayed below. Key metrics to monitor:
+    - **mAP50**: Mean Average Precision at IoU=0.5 (higher is better, target >0.7)
+    - **Loss**: Should decrease steadily over epochs
+    - **Precision/Recall**: Balance between false positives and false negatives
 
-@app.cell
-def _(mo):
-    mo.md(r"""## here i added .yaml file which is not on github""")
-    return
+    **Estimated time**: 30-60 minutes on GPU, 4-8 hours on CPU (50 epochs)
 
-
-@app.cell
-def _(dataset_path, yaml_path):
-    # Section: Create correct data.yaml
-
-    # Get absolute paths
-    train_path = (dataset_path / 'train' / 'images').resolve()
-    val_path = (dataset_path / 'valid' / 'images').resolve()
-    test_path = (dataset_path / 'test' / 'images').resolve()
-
-    # Create correct yaml content
-    yaml_content = f"""path: {dataset_path.resolve()}
-    train: train/images
-    val: valid/images
-    test: test/images
-
-    nc: 10
-    names:
-      0: Hardhat
-      1: Mask
-      2: NO-Hardhat
-      3: NO-Mask
-      4: NO-Safety Vest
-      5: Person
-      6: Safety Cone
-      7: Safety Vest
-      8: machinery
-      9: vehicle
+    Click the button below when ready to start training.
     """
-
-    # Write the corrected yaml
-    with open(yaml_path, 'w') as _f:
-        _f.write(yaml_content)
-
-    print("Updated data.yaml:")
-    print(yaml_content)
-
-    # Verify paths exist
-    print("\nVerifying paths:")
-    print(f"Train exists: {train_path.exists()}")
-    print(f"Val exists: {val_path.exists()}")
-    print(f"Test exists: {test_path.exists()}")
-    return
-
-
-@app.cell
-def _(dataset_path):
-    # Section: Verify data.yaml configuration
-    import yaml
-
-    yaml_path = dataset_path / "data.yaml"
-
-    with open(yaml_path, "r") as _f:
-        data_config = yaml.safe_load(_f)
-
-    print(f"Classes: {data_config['nc']}")
-    print(f"Names: {data_config['names']}")
-    return (yaml_path,)
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""# training on gpu""")
-    return
-
-
-@app.cell
-def _(model, yaml_path):
-    # Section: Train YOLOv8 on PPE dataset
-
-    # Train the model
-    # epochs: number of complete passes through the training data
-    # imgsz: input image size (must match dataset)
-    # batch: number of images processed together (adjust based on your GPU/RAM)
-    # device: 0 for GPU, 'cpu' for CPU
-    results = model.train(
-        data=str(yaml_path),
-        epochs=50,
-        imgsz=640,
-        batch=16,
-        device=0,  # Change to "cpu" if needed
-        project="runs/train",
-        name="ppe_detection",
     )
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""## ok lets check""")
-    return
+    train_button = mo.ui.run_button(label="Train Model")
+    train_button
+    return (train_button,)
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r""" """)
+@app.cell
+def _(
+    BATCH_SIZE,
+    DEVICE,
+    EPOCHS,
+    IMAGE_SIZE,
+    TRAINING_OUTPUT_DIR,
+    TRAINING_RUN_NAME,
+    YAML_CONFIG_PATH,
+    mo,
+    pretrained_model,
+    train_button,
+):
+    mo.stop(not train_button.value, mo.md("Press 'Train Model' button to start training"))
+
+    print(f"Training with parameters:")
+    print(f"  Epochs: {EPOCHS}")
+    print(f"  Image Size: {IMAGE_SIZE}")
+    print(f"  Batch Size: {BATCH_SIZE}")
+    print(f"  Device: {DEVICE}")
+
+    training_results = pretrained_model.train(
+        data=str(YAML_CONFIG_PATH),
+        epochs=EPOCHS,
+        imgsz=IMAGE_SIZE,
+        batch=BATCH_SIZE,
+        device=DEVICE,
+        project=TRAINING_OUTPUT_DIR,
+        name=TRAINING_RUN_NAME,
+    )
     return
 
 
 @app.cell
-def _(Path, YOLO, plt):
-    # Section: Analyze training results
+def _(mo):
+    mo.md(
+        r"""
+    ## Training Results Analysis
 
-    _results_path = Path('runs/train/ppe_detection2')
+    Load trained model and visualize training metrics, confusion matrix, and validation predictions.
+    """
+    )
+    return
 
-    # Load the best trained model
-    trained_model = YOLO(_results_path / 'weights' / 'best.pt')
 
-    # Display training results plot
-    import matplotlib.image as mpimg
+@app.cell
+def _(TRAINED_MODEL_PATH, YOLO, mo):
+    mo.stop(
+        not TRAINED_MODEL_PATH.exists(),
+        mo.md(f"**Trained model not found at `{TRAINED_MODEL_PATH}`. Please train the model first.**"),
+    )
+
+    trained_model = YOLO(TRAINED_MODEL_PATH)
+    print(f"Loaded trained model from: {TRAINED_MODEL_PATH}")
+    return (trained_model,)
+
+
+@app.cell
+def _(TRAINED_MODEL_PATH, mo, mpimg, plt):
+    mo.stop(
+        not TRAINED_MODEL_PATH.exists(),
+        mo.md("**Train the model first to see results.**"),
+    )
+
+    _results_dir = TRAINED_MODEL_PATH.parent.parent
 
     _fig, _axes = plt.subplots(2, 2, figsize=(15, 12))
 
-    # Show key result images
     _images_to_show = [
-        ('results.png', 'Training Metrics'),
-        ('confusion_matrix_normalized.png', 'Confusion Matrix'),
-        ('val_batch0_labels.jpg', 'Validation: Ground Truth'),
-        ('val_batch0_pred.jpg', 'Validation: Predictions')
+        ("results.png", "Training Metrics"),
+        ("confusion_matrix_normalized.png", "Confusion Matrix"),
+        ("val_batch0_labels.jpg", "Validation: Ground Truth"),
+        ("val_batch0_pred.jpg", "Validation: Predictions"),
     ]
 
     for _idx, (_img_name, _title) in enumerate(_images_to_show):
-        _img_path = _results_path / _img_name
+        _img_path = _results_dir / _img_name
         if _img_path.exists():
             _img = mpimg.imread(str(_img_path))
             _axes[_idx // 2, _idx % 2].imshow(_img)
             _axes[_idx // 2, _idx % 2].set_title(_title)
-            _axes[_idx // 2, _idx % 2].axis('off')
+            _axes[_idx // 2, _idx % 2].axis("off")
 
     plt.tight_layout()
-    plt.show()
-    return mpimg, trained_model
-
-
-@app.cell
-def _():
-    ## make it bigger
+    plt.gca()
     return
 
 
 @app.cell
-def _(Path, mpimg, plt):
-    # Section: Analyze training results - Large view
+def _(mo):
+    mo.md(
+        r"""
+    ## Detailed Training Metrics
 
-    _results_path = Path('runs/train/ppe_detection2')
+    Large-format visualizations for detailed analysis of training performance.
+    """
+    )
+    return
 
-    # Load the best trained model
-    # trained_model = YOLO(_results_path / 'weights' / 'best.pt')
 
+@app.cell
+def _(TRAINED_MODEL_PATH, mo, mpimg, plt):
+    mo.stop(
+        not TRAINED_MODEL_PATH.exists(),
+        mo.md("**Train the model first to see detailed results.**"),
+    )
 
-    # Show each important plot in full size, one at a time
+    _results_dir = TRAINED_MODEL_PATH.parent.parent
 
-    # 1. Training Metrics
+    # Training Metrics
     _fig1 = plt.figure(figsize=(20, 12))
-    _img1 = mpimg.imread(str(_results_path / 'results.png'))
+    _img1 = mpimg.imread(str(_results_dir / "results.png"))
     plt.imshow(_img1)
-    plt.title('Training Metrics (Loss, Precision, Recall, mAP)', fontsize=16)
-    plt.axis('off')
+    plt.title("Training Metrics (Loss, Precision, Recall, mAP)", fontsize=16)
+    plt.axis("off")
     plt.tight_layout()
     plt.show()
 
-    # 2. Confusion Matrix
+    # Confusion Matrix
     _fig2 = plt.figure(figsize=(16, 16))
-    _img2 = mpimg.imread(str(_results_path / 'confusion_matrix_normalized.png'))
+    _img2 = mpimg.imread(str(_results_dir / "confusion_matrix_normalized.png"))
     plt.imshow(_img2)
-    plt.title('Confusion Matrix (Normalized)', fontsize=16)
-    plt.axis('off')
+    plt.title("Confusion Matrix (Normalized)", fontsize=16)
+    plt.axis("off")
     plt.tight_layout()
     plt.show()
 
-    # 3. Validation Comparison
+    # Validation Comparison
     _fig3, _axes3 = plt.subplots(1, 2, figsize=(24, 12))
-    _img_labels = mpimg.imread(str(_results_path / 'val_batch0_labels.jpg'))
-    _img_preds = mpimg.imread(str(_results_path / 'val_batch0_pred.jpg'))
+    _img_labels = mpimg.imread(str(_results_dir / "val_batch0_labels.jpg"))
+    _img_preds = mpimg.imread(str(_results_dir / "val_batch0_pred.jpg"))
 
     _axes3[0].imshow(_img_labels)
-    _axes3[0].set_title('Validation: Ground Truth Labels', fontsize=14)
-    _axes3[0].axis('off')
+    _axes3[0].set_title("Validation: Ground Truth Labels", fontsize=14)
+    _axes3[0].axis("off")
 
     _axes3[1].imshow(_img_preds)
-    _axes3[1].set_title('Validation: Model Predictions', fontsize=14)
-    _axes3[1].axis('off')
+    _axes3[1].set_title("Validation: Model Predictions", fontsize=14)
+    _axes3[1].axis("off")
 
     plt.tight_layout()
-    plt.show()
+    plt.gca()
     return
 
 
 @app.cell
-def _(Path, np):
-    # Section: Interactive training results visualization with Bokeh
+def _(mo):
+    mo.md(
+        r"""
+    ## Interactive Training Results
 
-    from bokeh.plotting import figure, show, output_notebook
-    from bokeh.layouts import column
-    from PIL import Image
-    # import numpy as np
+    Zoomable Bokeh visualizations of training results with pan and zoom capabilities.
+    """
+    )
+    return
+
+
+@app.cell
+def _(
+    Image,
+    TRAINED_MODEL_PATH,
+    column,
+    figure,
+    mo,
+    np,
+    output_notebook,
+    show,
+):
+    mo.stop(
+        not TRAINED_MODEL_PATH.exists(),
+        mo.md("**Train the model first to see interactive results.**"),
+    )
 
     output_notebook()
 
-    _results_path = Path('runs/train/ppe_detection2')
+    _results_dir = TRAINED_MODEL_PATH.parent.parent
 
-    def show_image_bokeh(img_path, title, width=1200, height=800):
-        """Display image with Bokeh - properly"""
+    def _show_image_bokeh(img_path, title, width=1200, height=800):
+        """Display image with Bokeh for interactive exploration"""
         _img = np.array(Image.open(img_path))
-    
-        # Convert to RGBA if needed
-        if _img.ndim == 2:  # grayscale
-            _img_rgba = np.stack([_img, _img, _img, np.full(_img.shape, 255, dtype=np.uint8)], axis=2)
-        elif _img.shape[2] == 3:  # RGB
+
+        # Convert to RGBA
+        if _img.ndim == 2:
+            _img_rgba = np.stack(
+                [_img, _img, _img, np.full(_img.shape, 255, dtype=np.uint8)],
+                axis=2,
+            )
+        elif _img.shape[2] == 3:
             _img_rgba = np.dstack([_img, np.full(_img.shape[:2], 255, dtype=np.uint8)])
-        else:  # already RGBA
+        else:
             _img_rgba = _img
-    
-        # Flip vertically for Bokeh
+
         _img_rgba = np.flipud(_img_rgba)
-    
-        # Convert to uint32 view
         _img_uint32 = _img_rgba.view(dtype=np.uint32).reshape(_img_rgba.shape[:2])
-    
+
         _h, _w = _img_uint32.shape
-    
+
         _p = figure(
             width=width,
             height=height,
             title=title,
             x_range=(0, _w),
             y_range=(0, _h),
-            tools="pan,wheel_zoom,box_zoom,reset,save"
+            tools="pan,wheel_zoom,box_zoom,reset,save",
         )
-    
+
         _p.image_rgba(image=[_img_uint32], x=0, y=0, dw=_w, dh=_h)
         _p.axis.visible = False
-    
+
         return _p
 
-    # Create plots
-    _p1 = show_image_bokeh(_results_path / 'results.png', 'Training Metrics', 1400, 900)
-    _p2 = show_image_bokeh(_results_path / 'confusion_matrix_normalized.png', 'Confusion Matrix', 1000, 1000)
-    _p3 = show_image_bokeh(_results_path / 'val_batch0_labels.jpg', 'Ground Truth', 1200, 800)
-    _p4 = show_image_bokeh(_results_path / 'val_batch0_pred.jpg', 'Predictions', 1200, 800)
+    _p1 = _show_image_bokeh(_results_dir / "results.png", "Training Metrics", 1400, 900)
+    _p2 = _show_image_bokeh(
+        _results_dir / "confusion_matrix_normalized.png", "Confusion Matrix", 1000, 1000
+    )
+    _p3 = _show_image_bokeh(_results_dir / "val_batch0_labels.jpg", "Ground Truth", 1200, 800)
+    _p4 = _show_image_bokeh(_results_dir / "val_batch0_pred.jpg", "Predictions", 1200, 800)
 
-    # Show all
     show(column(_p1, _p2, _p3, _p4))
     return
 
 
 @app.cell
-def _(cv2, dataset_path, model, plt, trained_model):
-    def _():
-        # Section: Compare pre-trained vs fine-tuned model performance
+def _(mo):
+    mo.md(
+        r"""
+    ## Model Comparison: Pre-trained vs Fine-tuned
 
-        test_img_path = dataset_path / 'test' / 'images'
-        test_images_comparison = list(test_img_path.glob('*.jpg'))[:4]
-
-        fig, axes = plt.subplots(2, 4, figsize=(20, 10))
-
-        for idx, img_file in enumerate(test_images_comparison):
-            # Pre-trained COCO model
-            results_pretrained = model.predict(str(img_file), conf=0.25, verbose=False)
-            img_pretrained = results_pretrained[0].plot()
-            img_pretrained_rgb = cv2.cvtColor(img_pretrained, cv2.COLOR_BGR2RGB)
-        
-            # Fine-tuned PPE model
-            results_finetuned = trained_model.predict(str(img_file), conf=0.25, verbose=False)
-            img_finetuned = results_finetuned[0].plot()
-            img_finetuned_rgb = cv2.cvtColor(img_finetuned, cv2.COLOR_BGR2RGB)
-        
-            # Display
-            axes[0, idx].imshow(img_pretrained_rgb)
-            axes[0, idx].set_title(f'COCO: {len(results_pretrained[0].boxes)} detections', fontsize=10)
-            axes[0, idx].axis('off')
-        
-            axes[1, idx].imshow(img_finetuned_rgb)
-            axes[1, idx].set_title(f'PPE: {len(results_finetuned[0].boxes)} detections', fontsize=10)
-            axes[1, idx].axis('off')
-
-        fig.text(0.02, 0.75, 'Pre-trained\n(COCO)', fontsize=14, weight='bold', va='center', rotation=90)
-        fig.text(0.02, 0.25, 'Fine-tuned\n(PPE)', fontsize=14, weight='bold', va='center', rotation=90)
-
-        plt.tight_layout()
-        return plt.show()
-
-
-    _()
+    Side-by-side comparison of COCO pre-trained model vs PPE fine-tuned model on test images.
+    """
+    )
     return
 
 
 @app.cell
-def _():
+def _(
+    CONFIDENCE_THRESHOLD,
+    NUM_COMPARISON_IMAGES,
+    TEST_IMAGES_PATH,
+    TRAINED_MODEL_PATH,
+    cv2,
+    mo,
+    plt,
+    pretrained_model,
+    trained_model,
+):
+    mo.stop(
+        not TRAINED_MODEL_PATH.exists(),
+        mo.md("**Train the model first to see comparison.**"),
+    )
+
+    _comparison_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[:NUM_COMPARISON_IMAGES]
+
+    _fig, _axes = plt.subplots(2, 4, figsize=(20, 10))
+
+    for _idx, _img_file in enumerate(_comparison_images):
+        # Pre-trained COCO model
+        _results_pretrained = pretrained_model.predict(
+            str(_img_file), conf=CONFIDENCE_THRESHOLD, verbose=False
+        )
+        _img_pretrained = _results_pretrained[0].plot()
+        _img_pretrained_rgb = cv2.cvtColor(_img_pretrained, cv2.COLOR_BGR2RGB)
+
+        # Fine-tuned PPE model
+        _results_finetuned = trained_model.predict(
+            str(_img_file), conf=CONFIDENCE_THRESHOLD, verbose=False
+        )
+        _img_finetuned = _results_finetuned[0].plot()
+        _img_finetuned_rgb = cv2.cvtColor(_img_finetuned, cv2.COLOR_BGR2RGB)
+
+        # Display
+        _axes[0, _idx].imshow(_img_pretrained_rgb)
+        _axes[0, _idx].set_title(
+            f"COCO: {len(_results_pretrained[0].boxes)} detections", fontsize=10
+        )
+        _axes[0, _idx].axis("off")
+
+        _axes[1, _idx].imshow(_img_finetuned_rgb)
+        _axes[1, _idx].set_title(
+            f"PPE: {len(_results_finetuned[0].boxes)} detections", fontsize=10
+        )
+        _axes[1, _idx].axis("off")
+
+    _fig.text(
+        0.02,
+        0.75,
+        "Pre-trained\n(COCO)",
+        fontsize=14,
+        weight="bold",
+        va="center",
+        rotation=90,
+    )
+    _fig.text(
+        0.02,
+        0.25,
+        "Fine-tuned\n(PPE)",
+        fontsize=14,
+        weight="bold",
+        va="center",
+        rotation=90,
+    )
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Using the Trained Model
+
+    To use the trained model on new images:
+
+    ```python
+    from ultralytics import YOLO
+
+    # Load trained model
+    model = YOLO("runs/train/ppe_detection/weights/best.pt")
+
+    # Run inference
+    results = model.predict(
+        source="path/to/image.jpg",
+        conf=0.25,
+        save=True,
+        save_txt=True  # Save labels in YOLO format
+    )
+
+    # Get detections
+    for result in results:
+        boxes = result.boxes
+        for box in boxes:
+            cls = int(box.cls[0])
+            conf = float(box.conf[0])
+            print(f"Detected: {CLASS_NAMES[cls]} (confidence: {conf:.2f})")
+    ```
+
+    The model will save annotated images to `runs/detect/predict/`.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Troubleshooting
+
+    **Q: Training fails with CUDA out of memory**
+    - Reduce BATCH_SIZE in constants cell (try 8, then 4)
+    - Reduce IMAGE_SIZE to 416
+    - Close other GPU-intensive applications
+
+    **Q: Training is very slow**
+    - Check DEVICE is set to GPU (should see "GPU detected" message)
+    - If on CPU, reduce EPOCHS to 10 for faster iteration
+    - Ensure CUDA drivers are properly installed
+
+    **Q: Poor detection performance (low mAP)**
+    - Check class distribution - severe imbalance may need data augmentation
+    - Increase EPOCHS (try 100)
+    - Try larger YOLO models (yolov8s.pt, yolov8m.pt)
+    - Verify dataset labels are correct
+
+    **Q: Model doesn't exist error**
+    - Click "Train Model" button and wait for training to complete
+    - Check that TRAINING_RUN_NAME matches the actual folder in `runs/train/`
+    - Verify TRAINED_MODEL_PATH points to correct location
+
+    **Q: Dataset not found error**
+    - Ensure dataset is extracted to `data/archive/css-data/`
+    - Check directory structure matches expected layout
+    - Verify all splits (train/valid/test) exist
+
+    **Q: Import errors or missing packages**
+    - Run: `uv sync` to install all dependencies
+    - Check that you're using Python 3.13+
+    - Try: `uv add torch` if GPU detection fails
+    """
+    )
     return
 
 
