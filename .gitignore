@@ -5,3 +5,5 @@ layouts
 runs/train
 yolo11n.pt
 yolov8n.pt
+data/.DS_Store
+.DS_Store
