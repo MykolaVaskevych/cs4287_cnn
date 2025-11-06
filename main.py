@@ -1,11 +1,7 @@
 import marimo
 
 __generated_with = "0.17.0"
-app = marimo.App(
-    width="medium",
-    layout_file="layouts/main.slides.json",
-    auto_download=["ipynb"],
-)
+app = marimo.App(width="medium", auto_download=["ipynb"])
 
 
 @app.cell(hide_code=True)
@@ -18,6 +14,11 @@ def _(mo):
 def _():
     import marimo as mo
     return (mo,)
+
+
+@app.cell
+def _():
+    return
 
 
 @app.cell
@@ -91,16 +92,25 @@ def _(mo):
         r"""
     # CHECKS & SETTINGS
     ## NOTE: CHECK CONSTANTS BELOW TO ENSURE CORRECTNESS BEFORE RUNNING THE NOTEBOOK.
+
+    **⚡ Quick Navigation**: [Jump to Train Button](#training-configuration)
     """
     )
     return
 
 
 @app.cell
+def _(mo):
+    regenerate_yaml = mo.ui.checkbox(
+        label="# Regenerate YAML file (uncheck to skip if file is correct)",
+        value=False
+    )
+    regenerate_yaml
+    return (regenerate_yaml,)
+
+
+@app.cell
 def _(Path, np, random, torch):
-    DO_YOU_HAVE_YAML_FILE = True
-
-
     # Reproducibility
     RANDOM_SEED = 42
     random.seed(RANDOM_SEED)
@@ -141,7 +151,7 @@ def _(Path, np, random, torch):
     )
 
     # Training parameters
-    EPOCHS = 50  # Reduce to 10 for quick testing or CPU training
+    EPOCHS = 10  # Reduce to 10 for quick testing or CPU training
     IMAGE_SIZE = 640  # YOLO standard input size
     BATCH_SIZE = 16  # Reduce to 4-8 for low VRAM or CPU
 
@@ -187,7 +197,6 @@ def _(Path, np, random, torch):
         CONFIDENCE_THRESHOLD,
         DATASET_ROOT,
         DEVICE,
-        DO_YOU_HAVE_YAML_FILE,
         EPOCHS,
         IMAGE_SIZE,
         NUM_BASELINE_TEST_SAMPLES,
@@ -273,14 +282,14 @@ def _(mo):
 def _(
     CLASS_NAMES,
     DATASET_ROOT,
-    DO_YOU_HAVE_YAML_FILE,
     TEST_IMAGES_PATH,
     TRAINING_IMAGES_PATH,
     VALIDATION_IMAGES_PATH,
     YAML_CONFIG_PATH,
+    regenerate_yaml,
 ):
     # Generate YAML using CLASS_NAMES constant to ensure consistency
-    _names_yaml = "\n      ".join([f"{k}: {v}" for k, v in CLASS_NAMES.items()])
+    _names_yaml = "\n  ".join([f"{k}: {v}" for k, v in CLASS_NAMES.items()])
 
     _yaml_content = f"""path: {DATASET_ROOT.resolve()}
     train: train/images
@@ -292,14 +301,13 @@ def _(
       {_names_yaml}
     """
 
-    # Only update YAML if it doesn't exist or content differs
-
-
-    if not DO_YOU_HAVE_YAML_FILE:
+    if regenerate_yaml.value:
         with open(YAML_CONFIG_PATH, "w") as _f:
             _f.write(_yaml_content)
-        print("Updated data.yaml:")
+        print("✓ Generated data.yaml:")
         print(_yaml_content)
+    else:
+        print("✓ Skipped YAML generation (using existing file)")
 
     print("\nVerifying paths:")
     print(f"Train exists: {TRAINING_IMAGES_PATH.exists()}")
@@ -660,6 +668,8 @@ def _(
 def _(mo):
     mo.md(
         r"""
+    <span id="training-configuration"></span>
+
     ## Training Configuration
 
     Training progress will be displayed below. Key metrics to monitor:
