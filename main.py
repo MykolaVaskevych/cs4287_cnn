@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.17.0"
+__generated_with = "0.17.2"
 app = marimo.App(width="medium", auto_download=["ipynb"])
 
 
@@ -103,7 +103,7 @@ def _(mo):
 def _(mo):
     regenerate_yaml = mo.ui.checkbox(
         label="# Regenerate YAML file (uncheck to skip if file is correct)",
-        value=False
+        value=False,
     )
     regenerate_yaml
     return (regenerate_yaml,)
@@ -145,13 +145,13 @@ def _(Path, np, random, torch):
     # Model paths
     PRETRAINED_MODEL_PATH = "yolov8n.pt"
     TRAINING_OUTPUT_DIR = "runs/train"
-    TRAINING_RUN_NAME = "ppe_detection"
+    TRAINING_RUN_NAME = "ppe_detection4"
     TRAINED_MODEL_PATH = (
         Path(TRAINING_OUTPUT_DIR) / TRAINING_RUN_NAME / "weights" / "best.pt"
     )
 
     # Training parameters
-    EPOCHS = 10  # Reduce to 10 for quick testing or CPU training
+    EPOCHS = 100  # Reduce to 10 for quick testing or CPU training
     IMAGE_SIZE = 640  # YOLO standard input size
     BATCH_SIZE = 16  # Reduce to 4-8 for low VRAM or CPU
 
@@ -179,16 +179,16 @@ def _(Path, np, random, torch):
 
     # Bounding box colors (BGR format for OpenCV)
     BBOX_COLORS = {
-        0: (0, 255, 0),      # Hardhat - Green
-        1: (255, 255, 0),    # Mask - Cyan
-        2: (0, 0, 255),      # NO-Hardhat - Red
-        3: (0, 0, 255),      # NO-Mask - Red
-        4: (0, 0, 255),      # NO-Safety Vest - Red
-        5: (255, 0, 255),    # Person - Magenta
-        6: (0, 165, 255),    # Safety Cone - Orange
-        7: (0, 255, 0),      # Safety Vest - Green
+        0: (0, 255, 0),  # Hardhat - Green
+        1: (255, 255, 0),  # Mask - Cyan
+        2: (0, 0, 255),  # NO-Hardhat - Red
+        3: (0, 0, 255),  # NO-Mask - Red
+        4: (0, 0, 255),  # NO-Safety Vest - Red
+        5: (255, 0, 255),  # Person - Magenta
+        6: (0, 165, 255),  # Safety Cone - Orange
+        7: (0, 255, 0),  # Safety Vest - Green
         8: (128, 128, 128),  # machinery - Gray
-        9: (255, 0, 0),      # vehicle - Blue
+        9: (255, 0, 0),  # vehicle - Blue
     }
     return (
         BATCH_SIZE,
@@ -241,8 +241,12 @@ def _(
             _missing_paths.append(f"- {_name}: `{_path}`")
 
     if _missing_paths:
-        _error_msg = "**ERROR: Missing required paths:**\n\n" + "\n".join(_missing_paths)
-        _error_msg += "\n\n**Please ensure dataset is extracted to the correct location.**"
+        _error_msg = "**ERROR: Missing required paths:**\n\n" + "\n".join(
+            _missing_paths
+        )
+        _error_msg += (
+            "\n\n**Please ensure dataset is extracted to the correct location.**"
+        )
         mo.stop(True, mo.md(_error_msg))
 
     print("✓ All dataset paths validated successfully\n")
@@ -507,7 +511,6 @@ def _(
     draw_boxes_on_image,
     plt,
 ):
-
     print("=" * 50)
     print("VISUALIZING SAMPLE IMAGES")
     print("=" * 50)
@@ -621,7 +624,9 @@ def _(
     pretrained_model,
 ):
     # CRITICAL: Use TEST set for unbiased baseline evaluation
-    pretrained_test_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[:NUM_BASELINE_TEST_SAMPLES]
+    pretrained_test_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[
+        :NUM_BASELINE_TEST_SAMPLES
+    ]
 
     print("Testing pre-trained COCO model on TEST set (unbiased baseline):")
     for _img_file in pretrained_test_images:
@@ -648,7 +653,10 @@ def _(
 
     for _idx, _img_file in enumerate(pretrained_test_images):
         _results = pretrained_model.predict(
-            source=str(_img_file), conf=CONFIDENCE_THRESHOLD, save=False, verbose=False
+            source=str(_img_file),
+            conf=CONFIDENCE_THRESHOLD,
+            save=False,
+            verbose=False,
         )
 
         _result = _results[0]
@@ -705,7 +713,10 @@ def _(
     pretrained_model,
     train_button,
 ):
-    mo.stop(not train_button.value, mo.md("Press 'Train Model' button to start training"))
+    mo.stop(
+        not train_button.value,
+        mo.md("Press 'Train Model' button to start training"),
+    )
 
     print(f"Training with parameters:")
     print(f"  Epochs: {EPOCHS}")
@@ -741,7 +752,9 @@ def _(mo):
 def _(TRAINED_MODEL_PATH, YOLO, mo):
     mo.stop(
         not TRAINED_MODEL_PATH.exists(),
-        mo.md(f"**Trained model not found at `{TRAINED_MODEL_PATH}`. Please train the model first.**"),
+        mo.md(
+            f"**Trained model not found at `{TRAINED_MODEL_PATH}`. Please train the model first.**"
+        ),
     )
 
     trained_model = YOLO(TRAINED_MODEL_PATH)
@@ -869,6 +882,7 @@ def _(
 
     _results_dir = TRAINED_MODEL_PATH.parent.parent
 
+
     def _show_image_bokeh(img_path, title, width=1200, height=800):
         """Display image with Bokeh for interactive exploration"""
         _img = np.array(Image.open(img_path))
@@ -880,7 +894,9 @@ def _(
                 axis=2,
             )
         elif _img.shape[2] == 3:
-            _img_rgba = np.dstack([_img, np.full(_img.shape[:2], 255, dtype=np.uint8)])
+            _img_rgba = np.dstack(
+                [_img, np.full(_img.shape[:2], 255, dtype=np.uint8)]
+            )
         else:
             _img_rgba = _img
 
@@ -903,12 +919,22 @@ def _(
 
         return _p
 
-    _p1 = _show_image_bokeh(_results_dir / "results.png", "Training Metrics", 1400, 900)
-    _p2 = _show_image_bokeh(
-        _results_dir / "confusion_matrix_normalized.png", "Confusion Matrix", 1000, 1000
+
+    _p1 = _show_image_bokeh(
+        _results_dir / "results.png", "Training Metrics", 1400, 900
     )
-    _p3 = _show_image_bokeh(_results_dir / "val_batch0_labels.jpg", "Ground Truth", 1200, 800)
-    _p4 = _show_image_bokeh(_results_dir / "val_batch0_pred.jpg", "Predictions", 1200, 800)
+    _p2 = _show_image_bokeh(
+        _results_dir / "confusion_matrix_normalized.png",
+        "Confusion Matrix",
+        1000,
+        1000,
+    )
+    _p3 = _show_image_bokeh(
+        _results_dir / "val_batch0_labels.jpg", "Ground Truth", 1200, 800
+    )
+    _p4 = _show_image_bokeh(
+        _results_dir / "val_batch0_pred.jpg", "Predictions", 1200, 800
+    )
 
     show(column(_p1, _p2, _p3, _p4))
     return
@@ -943,7 +969,9 @@ def _(
         mo.md("**Train the model first to see comparison.**"),
     )
 
-    _comparison_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[:NUM_COMPARISON_IMAGES]
+    _comparison_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[
+        :NUM_COMPARISON_IMAGES
+    ]
 
     _fig, _axes = plt.subplots(2, 4, figsize=(20, 10))
 

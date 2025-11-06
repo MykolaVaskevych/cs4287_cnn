@@ -2,9 +2,6 @@ __marimo__
 data/archive
 data/archive.zip
 layouts
-runs/train/*
-!runs/train/**/best.pt
-!runs/train/**/last.pt
 yolo11n.pt
 yolov8n.pt
 data/.DS_Store
