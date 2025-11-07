@@ -36,8 +36,8 @@ def _():
     from bokeh.layouts import column
     from PIL import Image
     import torch
+    import math
     return (
-        Counter,
         Image,
         Path,
         YOLO,
@@ -61,7 +61,7 @@ def _(mo):
         r"""
     # CS4287-CNN: Construction Safety Equipment Detection
 
-    **Authors**: MYKOLA VASKEVYCH (22372199), Teammate Name (ID2)
+    **Authors**: MYKOLA VASKEVYCH (22372199), OLIVER FITZGERALD (22365958)
 
     **Status**: Code executes to completion: YES
 
@@ -135,6 +135,7 @@ def _(Path, np, random, torch):
     # Dataset paths
     DATASET_ROOT = Path.cwd() / "data" / "archive" / "css-data"
     TRAINING_IMAGES_PATH = (DATASET_ROOT / "train" / "images").resolve()
+    SAMPLE = (Path.cwd() / "sample/").resolve() # Tempporary Line Delete
     TRAINING_LABELS_PATH = (DATASET_ROOT / "train" / "labels").resolve()
     VALIDATION_IMAGES_PATH = (DATASET_ROOT / "valid" / "images").resolve()
     VALIDATION_LABELS_PATH = (DATASET_ROOT / "valid" / "labels").resolve()
@@ -159,7 +160,6 @@ def _(Path, np, random, torch):
     CONFIDENCE_THRESHOLD = 0.25  # Minimum confidence for detections (0.0-1.0)
 
     # Visualization parameters
-    NUM_SAMPLE_IMAGES = 6
     NUM_COMPARISON_IMAGES = 4
     NUM_BASELINE_TEST_SAMPLES = 3
 
@@ -201,8 +201,8 @@ def _(Path, np, random, torch):
         IMAGE_SIZE,
         NUM_BASELINE_TEST_SAMPLES,
         NUM_COMPARISON_IMAGES,
-        NUM_SAMPLE_IMAGES,
         PRETRAINED_MODEL_PATH,
+        SAMPLE,
         TEST_IMAGES_PATH,
         TRAINED_MODEL_PATH,
         TRAINING_IMAGES_PATH,
@@ -227,7 +227,7 @@ def _(
     VALIDATION_IMAGES_PATH,
     mo,
 ):
-    # Validate dataset structure exists
+    # Validate dataset is present and structure is correct
     _missing_paths = []
     _paths_to_check = {
         "Dataset root": DATASET_ROOT,
@@ -274,9 +274,10 @@ def _(
 def _(mo):
     mo.md(
         r"""
+    # Dataset
     ## Dataset Configuration
 
-    Generate YOLO-compatible data.yaml configuration file and verify dataset structure.
+    Generates the YOLO-compatible data.yaml configuration file
     """
     )
     return
@@ -305,6 +306,7 @@ def _(
       {_names_yaml}
     """
 
+    # Only update YAML if it doesn't exist or content differs
     if regenerate_yaml.value:
         with open(YAML_CONFIG_PATH, "w") as _f:
             _f.write(_yaml_content)
@@ -312,11 +314,6 @@ def _(
         print(_yaml_content)
     else:
         print("✓ Skipped YAML generation (using existing file)")
-
-    print("\nVerifying paths:")
-    print(f"Train exists: {TRAINING_IMAGES_PATH.exists()}")
-    print(f"Val exists: {VALIDATION_IMAGES_PATH.exists()}")
-    print(f"Test exists: {TEST_IMAGES_PATH.exists()}")
     return
 
 
@@ -324,7 +321,7 @@ def _(
 def _(mo):
     mo.md(
         r"""
-    ## Dataset Structure Analysis
+    ## Dataset Inspection
 
     Examine the distribution of images and labels across train/validation/test splits.
     """
@@ -353,9 +350,14 @@ def _(DATASET_ROOT):
 def _(mo):
     mo.md(
         r"""
-    ## Label Format Inspection
+    ## Label Analysis
 
-    YOLO format uses: `class_id x_center y_center width height` (normalized 0-1).
+    The following cell gives an example of how labels are formated for each image
+    YOLO format uses: 
+
+    `class_id x_center y_center width height` (normalized 0-1).
+
+    Example:
     """
     )
     return
@@ -370,16 +372,16 @@ def _(TRAINING_LABELS_PATH):
     _label_files = list(TRAINING_LABELS_PATH.glob("*.txt"))
     _first_label = _label_files[0]
 
-    print(f"\nLabel file: {_first_label.name}")
+    print(f"\nSample Label file: {_first_label.name}")
     print("\nContents (first 10 lines):")
+    print("\nFormat: class_id x_center y_center width height")
     with open(_first_label, "r") as _f:
         _lines = _f.readlines()[:10]
         for _i, _line in enumerate(_lines, 1):
             print(f"  {_i}. {_line.strip()}")
 
     print(f"\nTotal objects in this image: {len(_lines)}")
-    print("\nFormat: class_id x_center y_center width height")
-    print("(All values normalized between 0 and 1)")
+    print("(Note: All values normalized between 0 and 1)")
     return
 
 
@@ -396,12 +398,13 @@ def _(mo):
 
 
 @app.cell
-def _(Counter, DATASET_ROOT):
+def _(DATASET_ROOT):
     print("=" * 50)
     print("CLASS DISTRIBUTION")
     print("=" * 50)
 
-    _all_class_ids = []
+    _class_counts = {}
+    _total_objects = 0
 
     for _split in ["train", "valid", "test"]:
         _label_path = DATASET_ROOT / _split / "labels"
@@ -412,23 +415,16 @@ def _(Counter, DATASET_ROOT):
                     _parts = _line.strip().split()
                     if _parts:
                         _class_id = int(_parts[0])
-                        _all_class_ids.append(_class_id)
+                        _class_counts[_class_id] = _class_counts.get(_class_id, 0) + 1
+                        _total_objects += 1
 
-    _class_counts = Counter(_all_class_ids)
-
-    print(f"\nTotal objects across all images: {len(_all_class_ids)}")
+    print(f"\nTotal objects across all classes: {_total_objects}")
     print(f"Number of unique classes: {len(_class_counts)}")
     print("\nClass distribution:")
     for _class_id in sorted(_class_counts.keys()):
         _count = _class_counts[_class_id]
-        _percentage = (_count / len(_all_class_ids)) * 100
+        _percentage = (_count / _total_objects) * 100
         print(f"  Class {_class_id}: {_count:5d} objects ({_percentage:5.2f}%)")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""# Actual Code""")
     return
 
 
@@ -505,7 +501,6 @@ def _(cv2):
 def _(
     BBOX_COLORS,
     CLASS_NAMES,
-    NUM_SAMPLE_IMAGES,
     TRAINING_IMAGES_PATH,
     TRAINING_LABELS_PATH,
     draw_boxes_on_image,
@@ -515,23 +510,42 @@ def _(
     print("VISUALIZING SAMPLE IMAGES")
     print("=" * 50)
 
-    _image_files = list(TRAINING_IMAGES_PATH.glob("*.jpg"))[:NUM_SAMPLE_IMAGES]
-    _fig, _axes = plt.subplots(2, 3, figsize=(15, 10))
+    NUM_SAMPLE_IMAGES = 6 # Minimum == 3
+
+    _image_files = list(SAMPLE.glob("*.jpg"))[:NUM_SAMPLE_IMAGES]
+    _fig, _axes = plt.subplots(NUM_SAMPLE_IMAGES // 3, 3, figsize=(15, 10))
     _axes = _axes.flatten()
 
     for _idx, _img_file in enumerate(_image_files):
-        _label_file = TRAINING_LABELS_PATH / (_img_file.stem + ".txt")
+        _label_file = SAMPLE / (_img_file.stem + ".txt")
 
         if _label_file.exists():
             _img_with_boxes = draw_boxes_on_image(
                 _img_file, _label_file, CLASS_NAMES, BBOX_COLORS
             )
+            if _idx >= len(_axes):
+                break
+
             _axes[_idx].imshow(_img_with_boxes)
             _axes[_idx].set_title(f"Image: {_img_file.name}", fontsize=10)
             _axes[_idx].axis("off")
-
     plt.tight_layout()
     plt.show()
+
+    # --- Added code (displays each image individually) ---
+    """"
+    for _idx, _img_file in enumerate(_image_files):
+        _label_file = SAMPLE / (_img_file.stem + ".txt")
+        if _label_file.exists():
+            _img_with_boxes = draw_boxes_on_image(
+                _img_file, _label_file, CLASS_NAMES, BBOX_COLORS
+            )
+            plt.figure(figsize=(5, 5))
+            plt.imshow(_img_with_boxes)
+            plt.title(f"Individual View: {_img_file.name}")
+            plt.axis("off")
+            plt.show()
+    """
 
     print("\nLegend:")
     print("  Green: Hardhat, Safety Vest (PPE worn correctly)")
