@@ -18,30 +18,26 @@ def _():
 
 @app.cell
 def _():
-
-
-    return
-
-
-@app.cell
-def _():
     import random
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
     import cv2
     from pathlib import Path
     import numpy as np
-    from ultralytics import YOLO
-    import yaml
+    from ultralytics import YOLO  # type: ignore
     from collections import Counter, defaultdict
     from bokeh.plotting import figure, show, output_notebook
     from bokeh.layouts import column
     from PIL import Image
     import torch
+    from prettytable import PrettyTable
+    from prettytable import TableStyle
     return (
         Counter,
         Image,
         Path,
+        PrettyTable,
+        TableStyle,
         YOLO,
         column,
         cv2,
@@ -68,21 +64,8 @@ def _(mo):
     **Status**: Code executes to completion: YES
 
     ## Overview
-    This notebook fine-tunes a YOLOv8 nano model to detect Personal Protective Equipment (PPE)
-    violations on construction sites. The model identifies safety equipment (hardhats, masks,
-    safety vests) and flags violations when workers lack proper protection.
-
-    ## Dataset
-    - **Classes**: 10 (Hardhat, Mask, NO-Hardhat, NO-Mask, NO-Safety Vest, Person, Safety Cone, Safety Vest, machinery, vehicle)
-    - **Format**: YOLO format with normalized bounding boxes
-    - **Splits**: Train/Validation/Test
-
-    ## Quick Start
-    1. Ensure dataset is in `data/archive/css-data/` directory
-    2. Run all cells sequentially (training will not start automatically)
-    3. Review dataset statistics and quality
-    4. Click "Train Model" button when ready to train
-    5. Scroll down to see training results and model comparison
+    The model identifies safety equipment (hardhats, masks, safety vests) and flags violations when workers lack proper protection.
+    The model uses yolo
     """
     )
     return
@@ -95,7 +78,7 @@ def _(mo):
     # CHECKS & SETTINGS
     ## NOTE: CHECK CONSTANTS BELOW TO ENSURE CORRECTNESS BEFORE RUNNING THE NOTEBOOK.
 
-    **⚡ Quick Navigation**: [Jump to Train Button](#training-configuration)
+    ** Navigation**: [Jump to Train Button](#training-configuration)
     """
     )
     return
@@ -131,7 +114,7 @@ def _(Path, np, random, torch):
         print(f"Recommended BATCH_SIZE: {16 if _vram_gb >= 8 else 8}")
     else:
         DEVICE = "cpu"
-        print("⚠ No GPU detected - training will be significantly slower")
+        print("No GPU detected - training will be significantly slower")
         print("Recommended: Reduce EPOCHS to 10 and BATCH_SIZE to 4 for CPU")
 
     # Dataset paths
@@ -147,7 +130,7 @@ def _(Path, np, random, torch):
     # Model paths
     PRETRAINED_MODEL_PATH = "yolov8n.pt"
     TRAINING_OUTPUT_DIR = "runs/train"
-    TRAINING_RUN_NAME = "ppe_detection4"
+    TRAINING_RUN_NAME = "ppe_detection"
     TRAINED_MODEL_PATH = (
         Path(TRAINING_OUTPUT_DIR) / TRAINING_RUN_NAME / "weights" / "best.pt"
     )
@@ -181,16 +164,16 @@ def _(Path, np, random, torch):
 
     # Bounding box colors (BGR format for OpenCV)
     BBOX_COLORS = {
-        0: (0, 255, 0),  # Hardhat - Green
-        1: (255, 255, 0),  # Mask - Cyan
+        0: (0, 255, 0),  # Hardhat    - Green
+        1: (255, 255, 0),  # Mask       - Cyan
         2: (0, 0, 255),  # NO-Hardhat - Red
-        3: (0, 0, 255),  # NO-Mask - Red
+        3: (0, 0, 255),  # NO-Mask    - Red
         4: (0, 0, 255),  # NO-Safety Vest - Red
-        5: (255, 0, 255),  # Person - Magenta
-        6: (0, 165, 255),  # Safety Cone - Orange
-        7: (0, 255, 0),  # Safety Vest - Green
-        8: (128, 128, 128),  # machinery - Gray
-        9: (255, 0, 0),  # vehicle - Blue
+        5: (255, 0, 255),  # Person          - Magenta
+        6: (0, 165, 255),  # Safety Cone     - Orange
+        7: (0, 255, 0),  # Safety Vest     - Green
+        8: (128, 128, 128),  # machinery       - Gray
+        9: (255, 0, 0),  # vehicle         - Blue
     }
     return (
         BATCH_SIZE,
@@ -224,8 +207,10 @@ def _(
     DEVICE,
     EPOCHS,
     IMAGE_SIZE,
+    PrettyTable,
     TEST_IMAGES_PATH,
     TRAINING_IMAGES_PATH,
+    TableStyle,
     VALIDATION_IMAGES_PATH,
     mo,
 ):
@@ -251,24 +236,22 @@ def _(
         )
         mo.stop(True, mo.md(_error_msg))
 
-    print("✓ All dataset paths validated successfully\n")
+    print("All dataset paths validated successfully\n")
 
     # Display configuration summary
-    mo.md(
-        f"""
-        ## Current Configuration
-
-        | Parameter | Value | Description |
-        |-----------|-------|-------------|
-        | Device | `{DEVICE}` | Training device (0=GPU, 'cpu'=CPU) |
-        | Epochs | `{EPOCHS}` | Training iterations through dataset |
-        | Image Size | `{IMAGE_SIZE}px` | Input resolution |
-        | Batch Size | `{BATCH_SIZE}` | Images per training step |
-        | Confidence | `{CONFIDENCE_THRESHOLD}` | Min score for detections |
-
-        **Note**: Adjust BATCH_SIZE in constants cell if you get OOM (Out of Memory) errors.
-        """
+    _table = PrettyTable()
+    _table.field_names = ["Parameter", "Value", "Description"]
+    _table.add_rows(
+        [
+            ["Device", f"`{DEVICE}`", "Training device (0=GPU, 'cpu'=CPU)"],
+            ["Epochs", f"`{EPOCHS}`", "Training iterations through dataset"],
+            ["Image Size", f"`{IMAGE_SIZE}px`", "Input resolution"],
+            ["Batch Size", f"`{BATCH_SIZE}`", "Images per training step"],
+            ["Confidence", f"`{CONFIDENCE_THRESHOLD}`", "Min score for detections"],
+        ]
     )
+    _table.set_style(TableStyle.MARKDOWN)
+    mo.md(_table.get_string())
     return
 
 
@@ -310,10 +293,10 @@ def _(
     if regenerate_yaml.value:
         with open(YAML_CONFIG_PATH, "w") as _f:
             _f.write(_yaml_content)
-        print("✓ Generated data.yaml:")
+        print(" Generated data.yaml:")
         print(_yaml_content)
     else:
-        print("✓ Skipped YAML generation (using existing file)")
+        print(" Skipped YAML generation (using existing file)")
 
     print("\nVerifying paths:")
     print(f"Train exists: {TRAINING_IMAGES_PATH.exists()}")
@@ -884,7 +867,6 @@ def _(
 
     _results_dir = TRAINED_MODEL_PATH.parent.parent
 
-
     def _show_image_bokeh(img_path, title, width=1200, height=800):
         """Display image with Bokeh for interactive exploration"""
         _img = np.array(Image.open(img_path))
@@ -896,9 +878,7 @@ def _(
                 axis=2,
             )
         elif _img.shape[2] == 3:
-            _img_rgba = np.dstack(
-                [_img, np.full(_img.shape[:2], 255, dtype=np.uint8)]
-            )
+            _img_rgba = np.dstack([_img, np.full(_img.shape[:2], 255, dtype=np.uint8)])
         else:
             _img_rgba = _img
 
@@ -921,10 +901,7 @@ def _(
 
         return _p
 
-
-    _p1 = _show_image_bokeh(
-        _results_dir / "results.png", "Training Metrics", 1400, 900
-    )
+    _p1 = _show_image_bokeh(_results_dir / "results.png", "Training Metrics", 1400, 900)
     _p2 = _show_image_bokeh(
         _results_dir / "confusion_matrix_normalized.png",
         "Confusion Matrix",
@@ -971,9 +948,7 @@ def _(
         mo.md("**Train the model first to see comparison.**"),
     )
 
-    _comparison_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[
-        :NUM_COMPARISON_IMAGES
-    ]
+    _comparison_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[:NUM_COMPARISON_IMAGES]
 
     _fig, _axes = plt.subplots(2, 4, figsize=(20, 10))
 
@@ -1026,84 +1001,6 @@ def _(
 
     plt.tight_layout()
     plt.gca()
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    ## Using the Trained Model
-
-    To use the trained model on new images:
-
-    ```python
-    from ultralytics import YOLO
-
-    # Load trained model
-    model = YOLO("runs/train/ppe_detection/weights/best.pt")
-
-    # Run inference
-    results = model.predict(
-        source="path/to/image.jpg",
-        conf=0.25,
-        save=True,
-        save_txt=True  # Save labels in YOLO format
-    )
-
-    # Get detections
-    for result in results:
-        boxes = result.boxes
-        for box in boxes:
-            cls = int(box.cls[0])
-            conf = float(box.conf[0])
-            print(f"Detected: {CLASS_NAMES[cls]} (confidence: {conf:.2f})")
-    ```
-
-    The model will save annotated images to `runs/detect/predict/`.
-    """
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    ## Troubleshooting
-
-    **Q: Training fails with CUDA out of memory**
-    - Reduce BATCH_SIZE in constants cell (try 8, then 4)
-    - Reduce IMAGE_SIZE to 416
-    - Close other GPU-intensive applications
-
-    **Q: Training is very slow**
-    - Check DEVICE is set to GPU (should see "GPU detected" message)
-    - If on CPU, reduce EPOCHS to 10 for faster iteration
-    - Ensure CUDA drivers are properly installed
-
-    **Q: Poor detection performance (low mAP)**
-    - Check class distribution - severe imbalance may need data augmentation
-    - Increase EPOCHS (try 100)
-    - Try larger YOLO models (yolov8s.pt, yolov8m.pt)
-    - Verify dataset labels are correct
-
-    **Q: Model doesn't exist error**
-    - Click "Train Model" button and wait for training to complete
-    - Check that TRAINING_RUN_NAME matches the actual folder in `runs/train/`
-    - Verify TRAINED_MODEL_PATH points to correct location
-
-    **Q: Dataset not found error**
-    - Ensure dataset is extracted to `data/archive/css-data/`
-    - Check directory structure matches expected layout
-    - Verify all splits (train/valid/test) exist
-
-    **Q: Import errors or missing packages**
-    - Run: `uv sync` to install all dependencies
-    - Check that you're using Python 3.13+
-    - Try: `uv add torch` if GPU detection fails
-    """
-    )
     return
 
 
