@@ -1,0 +1,22 @@
+
+RUN: ppe_100_lr_0.02
+EXPERIMENT: lr_high - High learning rate
+COMPLETED: 2025-11-07 17:57:31
+DURATION: 0.18 hours
+
+HYPERPARAMETERS:
+  Learning Rate (lr0): 0.02
+  Epochs: 100
+  Batch Size: 16
+  Image Size: 640
+  Dropout: 0.0
+  Mosaic Augmentation: 1.0
+
+FINAL METRICS:
+  mAP@0.5: 0.7991
+  mAP@0.5:0.95: 0.4987
+  Precision: 0.8860
+  Recall: 0.7378
+  F1 Score: 0.8052
+
+STATUS: ✓ SUCCESS

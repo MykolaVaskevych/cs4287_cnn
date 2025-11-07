@@ -1,0 +1,21 @@
+{
+  "experiment_id": "lr_high",
+  "run_name": "ppe_100_lr_0.02",
+  "description": "High learning rate",
+  "parameters": {
+    "epochs": 100,
+    "lr0": 0.02,
+    "batch": 16,
+    "imgsz": 640,
+    "dropout": 0.0,
+    "mosaic": 1.0
+  },
+  "duration_hours": 0.18069444444444444,
+  "final_metrics": {
+    "mAP50": 0.79909,
+    "mAP50-95": 0.49872,
+    "precision": 0.88603,
+    "recall": 0.73781
+  },
+  "training_completed": "2025-11-07 17:57:31"
+}

@@ -1,0 +1,21 @@
+{
+  "experiment_id": "no_augment",
+  "run_name": "ppe_100_no_mosaic",
+  "description": "No mosaic augmentation",
+  "parameters": {
+    "epochs": 100,
+    "lr0": 0.01,
+    "batch": 16,
+    "imgsz": 640,
+    "dropout": 0.0,
+    "mosaic": 0.0
+  },
+  "duration_hours": 0.17785527777777776,
+  "final_metrics": {
+    "mAP50": 0.82546,
+    "mAP50-95": 0.5046,
+    "precision": 0.91681,
+    "recall": 0.73846
+  },
+  "training_completed": "2025-11-07 17:57:31"
+}

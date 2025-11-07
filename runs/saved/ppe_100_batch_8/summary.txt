@@ -1,0 +1,22 @@
+
+RUN: ppe_100_batch_8
+EXPERIMENT: batch_small - Smaller batch size
+COMPLETED: 2025-11-07 17:57:31
+DURATION: 0.25 hours
+
+HYPERPARAMETERS:
+  Learning Rate (lr0): 0.01
+  Epochs: 100
+  Batch Size: 8
+  Image Size: 640
+  Dropout: 0.0
+  Mosaic Augmentation: 1.0
+
+FINAL METRICS:
+  mAP@0.5: 0.8079
+  mAP@0.5:0.95: 0.5020
+  Precision: 0.8815
+  Recall: 0.7379
+  F1 Score: 0.8034
+
+STATUS: ✓ SUCCESS
