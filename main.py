@@ -18,6 +18,8 @@ def _():
 
 @app.cell
 def _():
+
+
     return
 
 
@@ -151,7 +153,7 @@ def _(Path, np, random, torch):
     )
 
     # Training parameters
-    EPOCHS = 100  # Reduce to 10 for quick testing or CPU training
+    EPOCHS = 500  # Reduce to 10 for quick testing or CPU training
     IMAGE_SIZE = 640  # YOLO standard input size
     BATCH_SIZE = 16  # Reduce to 4-8 for low VRAM or CPU
 
