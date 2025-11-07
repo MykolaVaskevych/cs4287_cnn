@@ -34,41 +34,24 @@ def _():
     from prettytable import TableStyle
     return (
         Counter,
-        Image,
         Path,
         PrettyTable,
         TableStyle,
         YOLO,
-        column,
         cv2,
         defaultdict,
-        figure,
         mpimg,
         np,
-        output_notebook,
         plt,
         random,
-        show,
         torch,
     )
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        r"""
-    # CS4287-CNN: Construction Safety Equipment Detection
-
-    **Authors**: MYKOLA VASKEVYCH (22372199), Teammate Name (ID2)
-
-    **Status**: Code executes to completion: YES
-
-    ## Overview
-    The model identifies safety equipment (hardhats, masks, safety vests) and flags violations when workers lack proper protection.
-    The model uses yolo
-    """
-    )
-    return
+@app.cell
+def _(TableStyle):
+    TABLES_STYLE = TableStyle.MARKDOWN  # DEFAULT | MARKDOWN | ASCII
+    return (TABLES_STYLE,)
 
 
 @app.cell
@@ -94,164 +77,97 @@ def _(mo):
     return (regenerate_yaml,)
 
 
-@app.cell
-def _(Path, np, random, torch):
-    # Reproducibility
-    RANDOM_SEED = 42
-    random.seed(RANDOM_SEED)
-    np.random.seed(RANDOM_SEED)
-    torch.manual_seed(RANDOM_SEED)
+@app.cell(hide_code=True)
+def _():
+    def ascii_table_to_latex(ascii_table, caption="", label="", precision=3):
+        """
+        tmp for latex stuff, dont forget to change table style to default or ascii
+        """
+        lines = ascii_table.strip().split("\n")
 
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(RANDOM_SEED)
+        data_lines = [line for line in lines if not line.startswith("+")]
 
-    # Auto-detect best available device
-    if torch.cuda.is_available():
-        DEVICE = 0
-        _device_name = torch.cuda.get_device_name(0)
-        _vram_gb = torch.cuda.get_device_properties(0).total_memory / 1024**3
-        print(f"GPU detected: {_device_name} ({_vram_gb:.1f}GB VRAM)")
-        print(f"Recommended BATCH_SIZE: {16 if _vram_gb >= 8 else 8}")
-    else:
-        DEVICE = "cpu"
-        print("No GPU detected - training will be significantly slower")
-        print("Recommended: Reduce EPOCHS to 10 and BATCH_SIZE to 4 for CPU")
+        if not data_lines:
+            return ""
+        header_line = data_lines[0]
+        data_rows = data_lines[1:]
 
-    # Dataset paths
-    DATASET_ROOT = Path.cwd() / "data" / "archive" / "css-data"
-    TRAINING_IMAGES_PATH = (DATASET_ROOT / "train" / "images").resolve()
-    TRAINING_LABELS_PATH = (DATASET_ROOT / "train" / "labels").resolve()
-    VALIDATION_IMAGES_PATH = (DATASET_ROOT / "valid" / "images").resolve()
-    VALIDATION_LABELS_PATH = (DATASET_ROOT / "valid" / "labels").resolve()
-    TEST_IMAGES_PATH = (DATASET_ROOT / "test" / "images").resolve()
-    TEST_LABELS_PATH = (DATASET_ROOT / "test" / "labels").resolve()
-    YAML_CONFIG_PATH = DATASET_ROOT / "data.yaml"
+        header_cells = [cell.strip() for cell in header_line.split("|")[1:-1]]
+        header_cells = [cell.replace("_", "\\_") for cell in header_cells]
 
-    # Model paths
-    PRETRAINED_MODEL_PATH = "yolov8n.pt"
-    TRAINING_OUTPUT_DIR = "runs/train"
-    TRAINING_RUN_NAME = "ppe_detection"
-    TRAINED_MODEL_PATH = (
-        Path(TRAINING_OUTPUT_DIR) / TRAINING_RUN_NAME / "weights" / "best.pt"
+        parsed_rows = []
+        for row in data_rows:
+            cells = [cell.strip() for cell in row.split("|")[1:-1]]
+            formatted_cells = []
+            for cell in cells:
+                try:
+                    num = float(cell)
+                    if num.is_integer():
+                        formatted_cells.append(str(int(num)))
+                    else:
+                        formatted_cells.append(f"{num:.{precision}f}")
+                except ValueError:
+                    formatted_cells.append(cell.replace("_", "\\_"))
+            parsed_rows.append(formatted_cells)
+
+        num_cols = len(header_cells)
+        colspec = "{" + "r" * num_cols + "}"
+
+        latex_code = []
+
+        if caption or label:
+            latex_code.append("\\begin{table}[h]")
+            if caption:
+                latex_code.append(f"    \\caption{{{caption}}}")
+            if label:
+                latex_code.append(f"    \\label{{{label}}}")
+            latex_code.append("    \\centering")
+
+        latex_code.append(f"    \\begin{{tabular}}{colspec}")
+        latex_code.append("    \\toprule")
+
+        header_str = " & ".join(header_cells)
+        latex_code.append(f"    {header_str} \\\\")
+        latex_code.append("    \\midrule")
+
+        for row in parsed_rows:
+            row_str = " & ".join(row)
+            latex_code.append(f"    {row_str} \\\\")
+
+        latex_code.append("    \\bottomrule")
+        latex_code.append("    \\end{tabular}")
+
+        if caption or label:
+            latex_code.append("\\end{table}")
+
+        return "\n".join(latex_code)
+
+
+    ascii_table = """
+    """
+
+    latex_output = ascii_table_to_latex(
+        ascii_table, caption="", label="", precision=3
     )
+    print(latex_output)
+    return
 
-    # Training parameters
-    EPOCHS = 500  # Reduce to 10 for quick testing or CPU training
-    IMAGE_SIZE = 640  # YOLO standard input size
-    BATCH_SIZE = 16  # Reduce to 4-8 for low VRAM or CPU
 
-    # Detection parameters
-    CONFIDENCE_THRESHOLD = 0.25  # Minimum confidence for detections (0.0-1.0)
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+    # CS4287-CNN: Construction Safety Equipment Detection
 
-    # Visualization parameters
-    NUM_SAMPLE_IMAGES = 6
-    NUM_COMPARISON_IMAGES = 4
-    NUM_BASELINE_TEST_SAMPLES = 3
+    **Authors**: MYKOLA VASKEVYCH (22372199), Teammate Name (ID2)
 
-    # Class definitions
-    CLASS_NAMES = {
-        0: "Hardhat",
-        1: "Mask",
-        2: "NO-Hardhat",
-        3: "NO-Mask",
-        4: "NO-Safety Vest",
-        5: "Person",
-        6: "Safety Cone",
-        7: "Safety Vest",
-        8: "machinery",
-        9: "vehicle",
-    }
+    **Status**: Code executes to completion: YES
 
-    # Bounding box colors (BGR format for OpenCV)
-    BBOX_COLORS = {
-        0: (0, 255, 0),  # Hardhat    - Green
-        1: (255, 255, 0),  # Mask       - Cyan
-        2: (0, 0, 255),  # NO-Hardhat - Red
-        3: (0, 0, 255),  # NO-Mask    - Red
-        4: (0, 0, 255),  # NO-Safety Vest - Red
-        5: (255, 0, 255),  # Person          - Magenta
-        6: (0, 165, 255),  # Safety Cone     - Orange
-        7: (0, 255, 0),  # Safety Vest     - Green
-        8: (128, 128, 128),  # machinery       - Gray
-        9: (255, 0, 0),  # vehicle         - Blue
-    }
-    return (
-        BATCH_SIZE,
-        BBOX_COLORS,
-        CLASS_NAMES,
-        CONFIDENCE_THRESHOLD,
-        DATASET_ROOT,
-        DEVICE,
-        EPOCHS,
-        IMAGE_SIZE,
-        NUM_BASELINE_TEST_SAMPLES,
-        NUM_COMPARISON_IMAGES,
-        NUM_SAMPLE_IMAGES,
-        PRETRAINED_MODEL_PATH,
-        TEST_IMAGES_PATH,
-        TRAINED_MODEL_PATH,
-        TRAINING_IMAGES_PATH,
-        TRAINING_LABELS_PATH,
-        TRAINING_OUTPUT_DIR,
-        TRAINING_RUN_NAME,
-        VALIDATION_IMAGES_PATH,
-        YAML_CONFIG_PATH,
+    ## Overview
+    The model identifies safety equipment (hardhats, masks, safety vests) and flags violations when workers lack proper protection.
+    The model uses yolo
+    """
     )
-
-
-@app.cell
-def _(
-    BATCH_SIZE,
-    CONFIDENCE_THRESHOLD,
-    DATASET_ROOT,
-    DEVICE,
-    EPOCHS,
-    IMAGE_SIZE,
-    PrettyTable,
-    TEST_IMAGES_PATH,
-    TRAINING_IMAGES_PATH,
-    TableStyle,
-    VALIDATION_IMAGES_PATH,
-    mo,
-):
-    # Validate dataset structure exists
-    _missing_paths = []
-    _paths_to_check = {
-        "Dataset root": DATASET_ROOT,
-        "Training images": TRAINING_IMAGES_PATH,
-        "Validation images": VALIDATION_IMAGES_PATH,
-        "Test images": TEST_IMAGES_PATH,
-    }
-
-    for _name, _path in _paths_to_check.items():
-        if not _path.exists():
-            _missing_paths.append(f"- {_name}: `{_path}`")
-
-    if _missing_paths:
-        _error_msg = "**ERROR: Missing required paths:**\n\n" + "\n".join(
-            _missing_paths
-        )
-        _error_msg += (
-            "\n\n**Please ensure dataset is extracted to the correct location.**"
-        )
-        mo.stop(True, mo.md(_error_msg))
-
-    print("All dataset paths validated successfully\n")
-
-    # Display configuration summary
-    _table = PrettyTable()
-    _table.field_names = ["Parameter", "Value", "Description"]
-    _table.add_rows(
-        [
-            ["Device", f"`{DEVICE}`", "Training device (0=GPU, 'cpu'=CPU)"],
-            ["Epochs", f"`{EPOCHS}`", "Training iterations through dataset"],
-            ["Image Size", f"`{IMAGE_SIZE}px`", "Input resolution"],
-            ["Batch Size", f"`{BATCH_SIZE}`", "Images per training step"],
-            ["Confidence", f"`{CONFIDENCE_THRESHOLD}`", "Min score for detections"],
-        ]
-    )
-    _table.set_style(TableStyle.MARKDOWN)
-    mo.md(_table.get_string())
     return
 
 
@@ -318,19 +234,141 @@ def _(mo):
 
 
 @app.cell
-def _(DATASET_ROOT):
-    print("=" * 50)
-    print("DATASET STRUCTURE")
-    print("=" * 50)
+def _(np, random, torch):
+    RANDOM_SEED = 42
+    random.seed(RANDOM_SEED)
+    np.random.seed(RANDOM_SEED)
+    torch.manual_seed(RANDOM_SEED)
+    return (RANDOM_SEED,)
 
-    for _split in ["train", "valid", "test"]:
-        _img_path = DATASET_ROOT / _split / "images"
-        _label_path = DATASET_ROOT / _split / "labels"
 
-        _num_images = len(list(_img_path.glob("*.jpg")))
-        _num_labels = len(list(_label_path.glob("*.txt")))
+@app.cell
+def _(RANDOM_SEED, torch):
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(RANDOM_SEED)
 
-        print(f"{_split.upper():10s}: {_num_images} images, {_num_labels} labels")
+
+    if torch.cuda.is_available():
+        DEVICE = 0
+        _device_name = torch.cuda.get_device_name(0)
+        _vram_gb = torch.cuda.get_device_properties(0).total_memory / 1024**3
+    else:
+        DEVICE = "cpu"
+    return (DEVICE,)
+
+
+@app.cell
+def _(Path):
+    # Dataset paths
+    DATASET_ROOT = Path.cwd() / "data" / "archive" / "css-data"
+    TRAINING_IMAGES_PATH = (DATASET_ROOT / "train" / "images").resolve()
+    TRAINING_LABELS_PATH = (DATASET_ROOT / "train" / "labels").resolve()
+    VALIDATION_IMAGES_PATH = (DATASET_ROOT / "valid" / "images").resolve()
+    VALIDATION_LABELS_PATH = (DATASET_ROOT / "valid" / "labels").resolve()
+    TEST_IMAGES_PATH = (DATASET_ROOT / "test" / "images").resolve()
+    TEST_LABELS_PATH = (DATASET_ROOT / "test" / "labels").resolve()
+    YAML_CONFIG_PATH = DATASET_ROOT / "data.yaml"
+
+    # Model paths
+    PRETRAINED_MODEL_PATH = "yolov8n.pt"
+    TRAINING_OUTPUT_DIR = "runs/train"
+    TRAINING_RUN_NAME = "ppe_detection"
+    TRAINED_MODEL_PATH = (
+        Path(TRAINING_OUTPUT_DIR) / TRAINING_RUN_NAME / "weights" / "best.pt"
+    )
+    return (
+        DATASET_ROOT,
+        PRETRAINED_MODEL_PATH,
+        TEST_IMAGES_PATH,
+        TRAINED_MODEL_PATH,
+        TRAINING_IMAGES_PATH,
+        TRAINING_LABELS_PATH,
+        TRAINING_OUTPUT_DIR,
+        TRAINING_RUN_NAME,
+        VALIDATION_IMAGES_PATH,
+        YAML_CONFIG_PATH,
+    )
+
+
+@app.cell
+def _():
+    # Training parameters
+    EPOCHS = 500  # Reduce to 10 for quick testing or CPU training
+    IMAGE_SIZE = 640  # YOLO standard input size
+    BATCH_SIZE = 16  # Reduce to 4-8 for low VRAM or CPU
+
+    # Detection parameters
+    CONFIDENCE_THRESHOLD = 0.25  # Minimum confidence for detections (0.0-1.0)
+    return BATCH_SIZE, CONFIDENCE_THRESHOLD, EPOCHS, IMAGE_SIZE
+
+
+@app.cell
+def _():
+    # Visualization parameters
+    NUM_SAMPLE_IMAGES = 6
+    NUM_COMPARISON_IMAGES = 4
+    NUM_BASELINE_TEST_SAMPLES = 3
+    return NUM_BASELINE_TEST_SAMPLES, NUM_COMPARISON_IMAGES, NUM_SAMPLE_IMAGES
+
+
+@app.cell
+def _(
+    BATCH_SIZE,
+    CONFIDENCE_THRESHOLD,
+    DEVICE,
+    EPOCHS,
+    IMAGE_SIZE,
+    PrettyTable,
+    TABLES_STYLE,
+    mo,
+):
+    # Display configuration summary
+    _table = PrettyTable()
+    _table.field_names = ["Parameter", "Value", "Description"]
+    _table.add_rows(
+        [
+            ["Device", f"`{DEVICE}`", "Training device (0=GPU, 'cpu'=CPU)"],
+            ["Epochs", f"`{EPOCHS}`", "Training iterations through dataset"],
+            ["Image Size", f"`{IMAGE_SIZE}px`", "Input resolution"],
+            ["Batch Size", f"`{BATCH_SIZE}`", "Images per training step"],
+            [
+                "Confidence",
+                f"`{CONFIDENCE_THRESHOLD}`",
+                "Min score for detections",
+            ],
+        ]
+    )
+    _table.set_style(TABLES_STYLE)
+    mo.md(_table.get_string())
+    return
+
+
+@app.cell
+def _(DATASET_ROOT, PrettyTable, TABLES_STYLE, mo):
+    # Display dataset structure summary
+    _table = PrettyTable()
+    _table.field_names = ["Split", "Images", "Labels"]
+    _table.add_rows(
+        [
+            [
+                "TRAIN",
+                len(list((DATASET_ROOT / "train" / "images").glob("*.jpg"))),
+                len(list((DATASET_ROOT / "train" / "labels").glob("*.txt"))),
+            ],
+            [
+                "VALID",
+                len(list((DATASET_ROOT / "valid" / "images").glob("*.jpg"))),
+                len(list((DATASET_ROOT / "valid" / "labels").glob("*.txt"))),
+            ],
+            [
+                "TEST",
+                len(list((DATASET_ROOT / "test" / "images").glob("*.jpg"))),
+                len(list((DATASET_ROOT / "test" / "labels").glob("*.txt"))),
+            ],
+        ]
+    )
+    _table.set_style(TABLES_STYLE)
+    mo.md(_table.get_string())
     return
 
 
@@ -347,24 +385,37 @@ def _(mo):
 
 
 @app.cell
-def _(TRAINING_LABELS_PATH):
-    print("=" * 50)
-    print("SAMPLE LABEL FILE")
-    print("=" * 50)
-
+def _(PrettyTable, TABLES_STYLE, TRAINING_LABELS_PATH, mo):
+    # Display sample label file
     _label_files = list(TRAINING_LABELS_PATH.glob("*.txt"))
     _first_label = _label_files[0]
 
-    print(f"\nLabel file: {_first_label.name}")
-    print("\nContents (first 10 lines):")
     with open(_first_label, "r") as _f:
         _lines = _f.readlines()[:10]
-        for _i, _line in enumerate(_lines, 1):
-            print(f"  {_i}. {_line.strip()}")
 
-    print(f"\nTotal objects in this image: {len(_lines)}")
-    print("\nFormat: class_id x_center y_center width height")
-    print("(All values normalized between 0 and 1)")
+    _table = PrettyTable()
+    _table.field_names = [
+        "Line",
+        "class_id",
+        "x_center",
+        "y_center",
+        "width",
+        "height",
+    ]
+    _table.add_rows(
+        [[_i] + _line.strip().split() for _i, _line in enumerate(_lines, 1)]
+    )
+    _table.set_style(TABLES_STYLE)
+
+    mo.md(f"""
+    ## SAMPLE LABEL FILE
+
+    **Label file:** `{_first_label.name}`
+
+    {_table.get_string()}
+
+    **Total objects in this image:** {len(_lines)}
+    """)
     return
 
 
@@ -381,16 +432,10 @@ def _(mo):
 
 
 @app.cell
-def _(Counter, DATASET_ROOT):
-    print("=" * 50)
-    print("CLASS DISTRIBUTION")
-    print("=" * 50)
-
+def _(Counter, DATASET_ROOT, PrettyTable, TableStyle, mo):
     _all_class_ids = []
-
     for _split in ["train", "valid", "test"]:
         _label_path = DATASET_ROOT / _split / "labels"
-
         for _label_file in _label_path.glob("*.txt"):
             with open(_label_file, "r") as _f:
                 for _line in _f:
@@ -401,13 +446,28 @@ def _(Counter, DATASET_ROOT):
 
     _class_counts = Counter(_all_class_ids)
 
-    print(f"\nTotal objects across all images: {len(_all_class_ids)}")
-    print(f"Number of unique classes: {len(_class_counts)}")
-    print("\nClass distribution:")
-    for _class_id in sorted(_class_counts.keys()):
-        _count = _class_counts[_class_id]
-        _percentage = (_count / len(_all_class_ids)) * 100
-        print(f"  Class {_class_id}: {_count:5d} objects ({_percentage:5.2f}%)")
+    _table = PrettyTable()
+    _table.field_names = ["Class ID", "Count", "Percentage"]
+    _table.add_rows(
+        [
+            [
+                _class_id,
+                _class_counts[_class_id],
+                f"{(_class_counts[_class_id] / len(_all_class_ids)) * 100:.2f}%",
+            ]
+            for _class_id in sorted(_class_counts.keys())
+        ]
+    )
+    _table.set_style(TableStyle.MARKDOWN)
+
+    mo.md(f"""
+    ## CLASS DISTRIBUTION
+
+    **Total objects:** {len(_all_class_ids)}  
+    **Number of unique classes:** {len(_class_counts)}
+
+    {_table.get_string()}
+    """)
     return
 
 
@@ -419,13 +479,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-    ## Sample Images Visualization
-
-    Display training images with ground truth bounding boxes overlaid.
-    """
-    )
+    mo.md(r"""## Sample Images Visualization""")
     return
 
 
@@ -488,14 +542,41 @@ def _(cv2):
 
 @app.cell
 def _(
-    BBOX_COLORS,
-    CLASS_NAMES,
     NUM_SAMPLE_IMAGES,
     TRAINING_IMAGES_PATH,
     TRAINING_LABELS_PATH,
     draw_boxes_on_image,
     plt,
 ):
+    # Bounding box colors (BGR format for OpenCV)
+    BBOX_COLORS = {
+        0: (0, 255, 0),  # Hardhat    - Green
+        1: (255, 255, 0),  # Mask       - Cyan
+        2: (0, 0, 255),  # NO-Hardhat - Red
+        3: (0, 0, 255),  # NO-Mask    - Red
+        4: (0, 0, 255),  # NO-Safety Vest - Red
+        5: (255, 0, 255),  # Person          - Magenta
+        6: (0, 165, 255),  # Safety Cone     - Orange
+        7: (0, 255, 0),  # Safety Vest     - Green
+        8: (128, 128, 128),  # machinery       - Gray
+        9: (255, 0, 0),  # vehicle         - Blue
+    }
+
+    # Class definitions
+    CLASS_NAMES = {
+        0: "Hardhat",
+        1: "Mask",
+        2: "NO-Hardhat",
+        3: "NO-Mask",
+        4: "NO-Safety Vest",
+        5: "Person",
+        6: "Safety Cone",
+        7: "Safety Vest",
+        8: "machinery",
+        9: "vehicle",
+    }
+
+
     print("=" * 50)
     print("VISUALIZING SAMPLE IMAGES")
     print("=" * 50)
@@ -525,7 +606,7 @@ def _(
     print("  Orange: Safety Cone")
     print("  Gray: Machinery")
     print("  Blue: Vehicle")
-    return
+    return (CLASS_NAMES,)
 
 
 @app.cell
@@ -583,7 +664,7 @@ def _(mo):
 
 @app.cell
 def _(PRETRAINED_MODEL_PATH, YOLO):
-    # Load YOLOv8 nano model pre-trained on COCO dataset (80 classes)
+    # Load YOLOv8 nano model pre-trained on COCO dataset
     pretrained_model = YOLO(PRETRAINED_MODEL_PATH)
     pretrained_model.info()
     return (pretrained_model,)
@@ -608,7 +689,6 @@ def _(
     TEST_IMAGES_PATH,
     pretrained_model,
 ):
-    # CRITICAL: Use TEST set for unbiased baseline evaluation
     pretrained_test_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[
         :NUM_BASELINE_TEST_SAMPLES
     ]
@@ -654,27 +734,6 @@ def _(
 
     plt.tight_layout()
     plt.gca()
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    <span id="training-configuration"></span>
-
-    ## Training Configuration
-
-    Training progress will be displayed below. Key metrics to monitor:
-    - **mAP50**: Mean Average Precision at IoU=0.5 (higher is better, target >0.7)
-    - **Loss**: Should decrease steadily over epochs
-    - **Precision/Recall**: Balance between false positives and false negatives
-
-    **Estimated time**: 30-60 minutes on GPU, 4-8 hours on CPU (50 epochs)
-
-    Click the button below when ready to start training.
-    """
-    )
     return
 
 
@@ -839,90 +898,6 @@ def _(TRAINED_MODEL_PATH, mo, mpimg, plt):
 def _(mo):
     mo.md(
         r"""
-    ## Interactive Training Results
-
-    Zoomable Bokeh visualizations of training results with pan and zoom capabilities.
-    """
-    )
-    return
-
-
-@app.cell
-def _(
-    Image,
-    TRAINED_MODEL_PATH,
-    column,
-    figure,
-    mo,
-    np,
-    output_notebook,
-    show,
-):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md("**Train the model first to see interactive results.**"),
-    )
-
-    output_notebook()
-
-    _results_dir = TRAINED_MODEL_PATH.parent.parent
-
-    def _show_image_bokeh(img_path, title, width=1200, height=800):
-        """Display image with Bokeh for interactive exploration"""
-        _img = np.array(Image.open(img_path))
-
-        # Convert to RGBA
-        if _img.ndim == 2:
-            _img_rgba = np.stack(
-                [_img, _img, _img, np.full(_img.shape, 255, dtype=np.uint8)],
-                axis=2,
-            )
-        elif _img.shape[2] == 3:
-            _img_rgba = np.dstack([_img, np.full(_img.shape[:2], 255, dtype=np.uint8)])
-        else:
-            _img_rgba = _img
-
-        _img_rgba = np.flipud(_img_rgba)
-        _img_uint32 = _img_rgba.view(dtype=np.uint32).reshape(_img_rgba.shape[:2])
-
-        _h, _w = _img_uint32.shape
-
-        _p = figure(
-            width=width,
-            height=height,
-            title=title,
-            x_range=(0, _w),
-            y_range=(0, _h),
-            tools="pan,wheel_zoom,box_zoom,reset,save",
-        )
-
-        _p.image_rgba(image=[_img_uint32], x=0, y=0, dw=_w, dh=_h)
-        _p.axis.visible = False
-
-        return _p
-
-    _p1 = _show_image_bokeh(_results_dir / "results.png", "Training Metrics", 1400, 900)
-    _p2 = _show_image_bokeh(
-        _results_dir / "confusion_matrix_normalized.png",
-        "Confusion Matrix",
-        1000,
-        1000,
-    )
-    _p3 = _show_image_bokeh(
-        _results_dir / "val_batch0_labels.jpg", "Ground Truth", 1200, 800
-    )
-    _p4 = _show_image_bokeh(
-        _results_dir / "val_batch0_pred.jpg", "Predictions", 1200, 800
-    )
-
-    show(column(_p1, _p2, _p3, _p4))
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
     ## Model Comparison: Pre-trained vs Fine-tuned
 
     Side-by-side comparison of COCO pre-trained model vs PPE fine-tuned model on test images.
@@ -948,7 +923,9 @@ def _(
         mo.md("**Train the model first to see comparison.**"),
     )
 
-    _comparison_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[:NUM_COMPARISON_IMAGES]
+    _comparison_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[
+        :NUM_COMPARISON_IMAGES
+    ]
 
     _fig, _axes = plt.subplots(2, 4, figsize=(20, 10))
 
