@@ -11,7 +11,7 @@ This project fine-tunes a YOLOv8 nano model to identify:
 
 ## Features
 
-- **Automated GPU Detection**: Automatically detects and uses available GPU or falls back to CPU
+- **Automated GPU Detection**: Automatically detects and uses available NVIDIA GPU or falls back to CPU
 - **Interactive Training**: Manual training trigger via button - no automatic execution
 - **Comprehensive Validation**: Pre-training checks for dataset existence and structure
 - **Results Analysis**: Confusion matrices, training metrics, and model comparison visualizations
@@ -20,7 +20,7 @@ This project fine-tunes a YOLOv8 nano model to identify:
 ## Requirements
 
 ### Hardware
-- **GPU (Recommended)**: NVIDIA GPU with 8GB+ VRAM
+- **GPU (Recommended)**: NVIDIA GPU with 8GB+ VRAM (If Available)
 - **CPU**: 16GB+ RAM (training will be significantly slower)
 - **Disk Space**: 5GB for dataset + 500MB for models
 
@@ -46,7 +46,7 @@ uv sync
 
 ### 3. Download Dataset
 
-Extract the Construction Site Safety dataset to:
+Extract the [Construction Site Safety](https://www.kaggle.com/datasets/snehilsanyal/construction-site-safety-image-dataset-roboflow) dataset to:
 ```
 data/archive/css-data/
 ├── train/
@@ -73,7 +73,7 @@ uv run marimo run main.py
 ## Usage Workflow
 
 1. **Dataset Exploration**
-   - Run all cells to validate dataset paths
+   - Run all cells sequentially to validate dataset paths
    - Review class distribution and data quality
    - Examine sample images with annotations
 
@@ -236,11 +236,11 @@ uv run marimo check --fix main.py
 ## Authors
 
 - MYKOLA VASKEVYCH (22372199)
-- Teammate Name (ID2)
+- OLIVER FITZGERALD (22365958)
 
 ## License
 
-Academic project for CS4287-CNN course.
+Academic project for CS4287 Neural Computing course.
 
 ## Acknowledgments
 

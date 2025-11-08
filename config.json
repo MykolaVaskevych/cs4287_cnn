@@ -1,0 +1,21 @@
+{
+  "source paths": [
+    "data/archive/css-data/train",
+    "data/archive/css-data/test",
+    "data/archive/css-data/valid"
+  ],
+  "targets": [
+    {
+      "target path": "data/archive/css-data/train",
+      "distribution": "0.80"
+    },
+    {
+      "target path": "data/archive/css-data/test",
+      "distribution": "0.10"
+    },
+    {
+      "target path": "data/archive/css-data/valid",
+      "distribution": "0.10"
+    }
+  ]
+}
