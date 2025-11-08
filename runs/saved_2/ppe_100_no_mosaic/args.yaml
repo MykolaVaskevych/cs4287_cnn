@@ -14,11 +14,11 @@ device: '0'
 workers: 8
 project: runs/saved_2
 name: ppe_100_no_mosaic
-exist_ok: false
+exist_ok: true
 pretrained: true
 optimizer: auto
 verbose: true
-seed: 0
+seed: 44
 deterministic: true
 single_cls: false
 rect: false

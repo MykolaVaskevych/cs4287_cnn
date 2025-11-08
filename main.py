@@ -210,9 +210,7 @@ def _(Path):
     DATASET_ROOT = Path.cwd() / "data" / "archive" / "css-data"
     TRAINING_IMAGES_PATH = (DATASET_ROOT / "train" / "images").resolve()
     TRAINING_LABELS_PATH = (DATASET_ROOT / "train" / "labels").resolve()
-    VALIDATION_IMAGES_PATH = (DATASET_ROOT / "valid" / "images").resolve()
     TEST_IMAGES_PATH = (DATASET_ROOT / "test" / "images").resolve()
-    YAML_CONFIG_PATH = DATASET_ROOT / "data.yaml"
     PRETRAINED_MODEL_PATH = "yolov8n.pt"
     return (
         DATASET_ROOT,
@@ -227,10 +225,7 @@ def _(Path):
 def _():
     CONFIDENCE_THRESHOLD = 0.25
     NUM_SAMPLE_IMAGES = 6
-    NUM_COMPARISON_IMAGES = 4
     NUM_BASELINE_TEST_SAMPLES = 3
-    IMAGE_SIZE = 640
-    SAVED_RUNS_DIR = "runs/saved_2"
     return CONFIDENCE_THRESHOLD, NUM_BASELINE_TEST_SAMPLES, NUM_SAMPLE_IMAGES
 
 
@@ -244,6 +239,7 @@ def _(YOLO):
         mosaic=1.0,
         name="experiment",
         project="runs/saved_2",
+        seed=0,
     ):
         model = YOLO("yolov8n.pt")
         results = model.train(
@@ -254,11 +250,14 @@ def _(YOLO):
             device=0,
             project=project,
             name=name,
+            exist_ok=True,
             lr0=lr0,
             dropout=dropout,
             mosaic=mosaic,
             patience=100,
             save=True,
+            seed=seed,
+            deterministic=True,
         )
         return results
     return (train_model,)
@@ -388,6 +387,219 @@ def _(Counter, DATASET_ROOT, PrettyTable, TableStyle, mo):
     **Number of unique classes:** {len(_class_counts)}
 
     {_table.get_string()}
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Data Validation & Cleaning
+
+    Validate dataset integrity and remove corrupted/invalid data before training.
+    """
+    )
+    return
+
+
+@app.cell
+def _(cv2):
+    def validate_image(img_path):
+        """Check if image can be loaded and is not corrupted"""
+        try:
+            _img = cv2.imread(str(img_path))
+            if _img is None:
+                return False, "Failed to load"
+            if _img.size == 0:
+                return False, "Empty image"
+            return True, None
+        except Exception as _e:
+            return False, str(_e)
+
+
+    def validate_label(label_path, num_classes=10):
+        """Validate label file content"""
+        _issues = []
+        try:
+            with open(label_path, "r") as _f:
+                _lines = _f.readlines()
+
+            if not _lines:
+                return True, None  # Empty labels are valid (no objects)
+
+            for _i, _line in enumerate(_lines, 1):
+                _parts = _line.strip().split()
+                if len(_parts) != 5:
+                    _issues.append(
+                        f"Line {_i}: Invalid format (expected 5 values)"
+                    )
+                    continue
+
+                try:
+                    _cls, _x, _y, _w, _h = map(float, _parts)
+
+                    if not (0 <= _cls < num_classes):
+                        _issues.append(f"Line {_i}: Invalid class {int(_cls)}")
+                    if not (0 <= _x <= 1 and 0 <= _y <= 1):
+                        _issues.append(f"Line {_i}: Center coords out of range")
+                    if not (0 < _w <= 1 and 0 < _h <= 1):
+                        _issues.append(f"Line {_i}: Invalid dimensions")
+                except ValueError:
+                    _issues.append(f"Line {_i}: Non-numeric values")
+
+            return len(_issues) == 0, _issues if _issues else None
+        except Exception as _e:
+            return False, [str(_e)]
+    return validate_image, validate_label
+
+
+@app.cell
+def _(DATASET_ROOT, validate_image, validate_label):
+    def scan_dataset(dataset_root):
+        """Scan all splits and collect validation issues"""
+        _issues = {
+            "corrupted_images": [],
+            "missing_labels": [],
+            "missing_images": [],
+            "invalid_labels": [],
+        }
+
+        for _split in ["train", "valid", "test"]:
+            _img_dir = dataset_root / _split / "images"
+            _lbl_dir = dataset_root / _split / "labels"
+
+            if not _img_dir.exists() or not _lbl_dir.exists():
+                continue
+
+            # Check images
+            for _img_path in _img_dir.glob("*.jpg"):
+                _lbl_path = _lbl_dir / f"{_img_path.stem}.txt"
+
+                # Validate image
+                _valid, _error = validate_image(_img_path)
+                if not _valid:
+                    _issues["corrupted_images"].append(
+                        (_split, _img_path.name, _error)
+                    )
+
+                # Check label exists
+                if not _lbl_path.exists():
+                    _issues["missing_labels"].append((_split, _img_path.name))
+
+            # Check for orphaned labels
+            for _lbl_path in _lbl_dir.glob("*.txt"):
+                _img_path = _img_dir / f"{_lbl_path.stem}.jpg"
+                if not _img_path.exists():
+                    _issues["missing_images"].append((_split, _lbl_path.name))
+                else:
+                    # Validate label content
+                    _valid, _errors = validate_label(_lbl_path)
+                    if not _valid:
+                        _issues["invalid_labels"].append(
+                            (_split, _lbl_path.name, _errors)
+                        )
+
+        return _issues
+
+
+    validation_issues = scan_dataset(DATASET_ROOT)
+    return (validation_issues,)
+
+
+@app.cell
+def _(PrettyTable, TABLES_STYLE, mo, validation_issues):
+    _table = PrettyTable()
+    _table.field_names = ["Issue Type", "Count"]
+    _table.add_rows(
+        [
+            ["Corrupted Images", len(validation_issues["corrupted_images"])],
+            ["Missing Labels", len(validation_issues["missing_labels"])],
+            ["Orphaned Labels", len(validation_issues["missing_images"])],
+            ["Invalid Labels", len(validation_issues["invalid_labels"])],
+        ]
+    )
+    _table.set_style(TABLES_STYLE)
+
+    _total = sum(len(_v) for _v in validation_issues.values())
+
+    mo.md(f"""
+    ## Validation Results
+
+    {_table.get_string()}
+
+    **Total Issues Found:** {_total}
+    """)
+    return
+
+
+@app.cell
+def _(mo, validation_issues):
+    _has_issues = any(len(_v) > 0 for _v in validation_issues.values())
+
+    if _has_issues:
+        clean_btn = mo.ui.run_button(label="Clean Dataset")
+        clean_btn
+    else:
+        clean_btn = None
+        mo.md("**Dataset is clean - no issues found**")
+    return (clean_btn,)
+
+
+@app.cell
+def _(DATASET_ROOT, Path, clean_btn, mo, validation_issues):
+    mo.stop(
+        clean_btn is None or not clean_btn.value,
+        mo.md("Click button to clean dataset"),
+    )
+
+    _cleaned = {"images": 0, "labels": 0}
+
+    # Remove corrupted images and their labels
+    for _split, _img_name, _error in validation_issues["corrupted_images"]:
+        _img_path = DATASET_ROOT / _split / "images" / _img_name
+        _lbl_path = (
+            DATASET_ROOT / _split / "labels" / f"{Path(_img_name).stem}.txt"
+        )
+
+        if _img_path.exists():
+            _img_path.unlink()
+            _cleaned["images"] += 1
+        if _lbl_path.exists():
+            _lbl_path.unlink()
+            _cleaned["labels"] += 1
+
+    # Remove images without labels
+    for _split, _img_name in validation_issues["missing_labels"]:
+        _img_path = DATASET_ROOT / _split / "images" / _img_name
+        if _img_path.exists():
+            _img_path.unlink()
+            _cleaned["images"] += 1
+
+    # Remove orphaned labels
+    for _split, _lbl_name in validation_issues["missing_images"]:
+        _lbl_path = DATASET_ROOT / _split / "labels" / _lbl_name
+        if _lbl_path.exists():
+            _lbl_path.unlink()
+            _cleaned["labels"] += 1
+
+    # Remove invalid labels (and corresponding images)
+    for _split, _lbl_name, _errors in validation_issues["invalid_labels"]:
+        _lbl_path = DATASET_ROOT / _split / "labels" / _lbl_name
+        _img_path = (
+            DATASET_ROOT / _split / "images" / f"{Path(_lbl_name).stem}.jpg"
+        )
+
+        if _lbl_path.exists():
+            _lbl_path.unlink()
+            _cleaned["labels"] += 1
+        if _img_path.exists():
+            _img_path.unlink()
+            _cleaned["images"] += 1
+
+    mo.md(f"""ok
+    **Removed:** {_cleaned["images"]} images, {_cleaned["labels"]} labels
+
     """)
     return
 
@@ -686,7 +898,7 @@ def _(mo):
 @app.cell
 def _(mo, train_baseline, train_model):
     mo.stop(not train_baseline.value)
-    train_model(epochs=100, batch=16, name="ppe_100")
+    train_model(epochs=100, batch=16, name="ppe_100", seed=42)
     return
 
 
@@ -706,7 +918,7 @@ def _(mo):
 @app.cell
 def _(mo, train_batch8, train_model):
     mo.stop(not train_batch8.value)
-    train_model(epochs=100, batch=8, name="ppe_100_batch_8")
+    train_model(epochs=100, batch=8, name="ppe_100_batch_8", seed=43)
     return
 
 
@@ -726,7 +938,9 @@ def _(mo):
 @app.cell
 def _(mo, train_model, train_no_mosaic):
     mo.stop(not train_no_mosaic.value)
-    train_model(epochs=100, batch=16, mosaic=0.0, name="ppe_100_no_mosaic")
+    train_model(
+        epochs=100, batch=16, mosaic=0.0, name="ppe_100_no_mosaic", seed=44
+    )
     return
 
 
@@ -746,7 +960,7 @@ def _(mo):
 @app.cell
 def _(mo, train_lr001, train_model):
     mo.stop(not train_lr001.value)
-    train_model(epochs=100, batch=16, lr0=0.001, name="ppe_100_lr_0.001")
+    train_model(epochs=100, batch=16, lr0=0.001, name="ppe_100_lr_0.001", seed=45)
     return
 
 
@@ -766,7 +980,7 @@ def _(mo):
 @app.cell
 def _(mo, train_lr002, train_model):
     mo.stop(not train_lr002.value)
-    train_model(epochs=100, batch=16, lr0=0.02, name="ppe_100_lr_0.02")
+    train_model(epochs=100, batch=16, lr0=0.02, name="ppe_100_lr_0.02", seed=46)
     return
 
 
@@ -786,7 +1000,9 @@ def _(mo):
 @app.cell
 def _(mo, train_dropout, train_model):
     mo.stop(not train_dropout.value)
-    train_model(epochs=100, batch=16, dropout=0.2, name="ppe_100_dropout_0.2")
+    train_model(
+        epochs=100, batch=16, dropout=0.2, name="ppe_100_dropout_0.2", seed=47
+    )
     return
 
 
@@ -806,7 +1022,7 @@ def _(mo):
 @app.cell
 def _(mo, train_combined, train_model):
     mo.stop(not train_combined.value)
-    train_model(epochs=750, batch=8, mosaic=0.0, name="ppe_750_combined")
+    train_model(epochs=750, batch=8, mosaic=0.0, name="ppe_750_combined", seed=48)
     return
 
 
@@ -1293,7 +1509,7 @@ def _(PrettyTable, TABLES_STYLE, all_runs, mo, np):
 
     for _name, _data in sorted(all_runs.items()):
         _results = _data["results"]
-        _map_values = _results["metrics/mAP50-95(B)"]
+        _map_values = _results["metrics/mAP50-95(B)"].to_numpy()
         _last_10_avg = np.mean(_map_values[-10:])
         _best_map = np.max(_map_values)
         _best_epoch = np.argmax(_map_values) + 1
