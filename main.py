@@ -37,6 +37,8 @@ def _():
     from PIL import Image
     import torch
     import math
+    import json
+    import shutil
     return (
         Image,
         Path,
@@ -45,12 +47,14 @@ def _():
         cv2,
         defaultdict,
         figure,
+        json,
         mpimg,
         np,
         output_notebook,
         plt,
         random,
         show,
+        shutil,
         torch,
     )
 
@@ -284,15 +288,7 @@ def _(mo):
 
 
 @app.cell
-def _(
-    CLASS_NAMES,
-    DATASET_ROOT,
-    TEST_IMAGES_PATH,
-    TRAINING_IMAGES_PATH,
-    VALIDATION_IMAGES_PATH,
-    YAML_CONFIG_PATH,
-    regenerate_yaml,
-):
+def _(CLASS_NAMES, DATASET_ROOT, YAML_CONFIG_PATH, regenerate_yaml):
     # Generate YAML using CLASS_NAMES constant to ensure consistency
     _names_yaml = "\n  ".join([f"{k}: {v}" for k, v in CLASS_NAMES.items()])
 
@@ -330,11 +326,152 @@ def _(mo):
 
 
 @app.cell
-def _(DATASET_ROOT):
+def _(DATASET_ROOT, Path, json, random, shutil):
     print("=" * 50)
     print("DATASET STRUCTURE")
     print("=" * 50)
 
+    # Re-Structure Dataset to 80:10:10 Train:Test:Validation Split
+    # File extensionsed that are moved
+    image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'}
+
+    class FileGrouping:
+        def __init__(self, filePath, labelPath):
+            self.filePath = filePath
+            self.labelPath = labelPath
+
+    class Configuration:
+        def __init__(self,configuration_path):
+
+            fileType = configuration_path[len(configuration_path) - 5:]
+            if fileType != ".json":
+                raise ValueError(f"Given filetype \"{fileType}\" But must be of type \"*.json\"")
+
+            with open(configuration_path, "r") as file:
+                fileContent = json.load(file)
+
+                self.source = [Path(path) for path in fileContent["source paths"]]
+                self.target = fileContent["targets"]
+
+        def __repr__(self):
+
+            reprString = "Source Folders\n"
+            for source in self.source:
+                reprString += " - " + source + "\n"
+            reprString += "\n"
+
+            reprString += "Target Folders\n"
+            for target in self.target:
+                reprString += " - " + target["target path"] + " (" + target["distribution"] + " of total images)\n"
+
+            return reprString
+
+    def redistribute_images(configuration):
+        """
+        Redistributes files from a set of source directories to a set of target directories
+        according to a specified distribution.
+
+        Args:
+            configuration (dict): Dictionary specifying the redistribution operation:
+                - 'source paths': List of source directories containing files.
+                - 'targets': List of dictionaries, each with:
+                    - 'target path': Path to the target directory.
+                    - 'distribution': Fraction (string or float) of files to move to this target.
+        """
+        global image_extensions
+
+        # Verify directories exist
+        if not all(directory.exists() for directory in configuration.source):
+            print(f"Error: One or more of the specified source directories don't exist! {configuration.source}")
+            return
+        if not all(Path(target["target path"]).exists() for target in configuration.target):
+            print(f"Error: One or more of the specified target directories don't exist! {configuration.source}")
+            return
+
+
+        # Collect all images from all directories
+        all_images = []
+        currentDistribution = {}
+        for directory in configuration.source:
+            count = 0
+            for file_path in directory.rglob('*'):
+
+                relative_path = file_path.relative_to(directory)
+                imagePath = directory / relative_path  # actual image path
+                labelPath = Path(str(imagePath)
+                                 .replace('/images/', '/labels/', 1)
+                                 .rsplit('.', 1)[0] + '.txt')
+
+                if imagePath.is_file() and labelPath.is_file():
+
+                    # Create FileGrouping object
+                    file_grouping = FileGrouping(imagePath, labelPath)
+                    all_images.append(file_grouping)
+                    count += 1
+            currentDistribution[directory] = count
+
+        total_images = len(all_images)
+        if total_images == 0:
+            raise ValueError(f"No images in the given source paths: {configuration.source}")
+
+        print(f"Found {total_images} total images")
+        print("Current Distribution:")
+        for directory, fileCount in currentDistribution.items():
+            print(f"{" " * 4}{directory} contains {fileCount} files constituting ({fileCount / total_images}) of the full distribution (1.0)")
+
+        # Shuffle images randomly
+        print("Shuffiling images ...")
+        random.shuffle(all_images)
+
+        # Calculate split indices
+        print("\nMoving images...")
+        for target in configuration.target:
+            images = all_images[:round(float(target["distribution"]) * total_images)] 
+            all_images = all_images[round(float(target["distribution"]) * total_images):] 
+            move_images(images, Path(target["target path"]))
+
+
+        print("✓ Redistribution complete!")
+
+        print(f"\nNew distribution:")
+        for target in configuration.target:
+            print(f"{" " * 4}{target["target path"]} contains {float(target["distribution"]) * total_images} files constituting ({float(target["distribution"]) * total_images / total_images}) of the full distribution (1.0)")
+
+    def move_images(image_list, target_dir):
+        """
+        Moves a list of FileGrouping objects (images and labels) to given target directories
+        Args:
+            image_list (list): List of FileGrouping objects to be moved
+            target_dir: The base target directory (images go to target_dir/images, labels to target_dir/labels)
+        """
+        # Create target subdirectories for images and labels
+        target_images_dir = target_dir / 'images'
+        target_labels_dir = target_dir / 'labels'
+
+        for file_grouping in image_list:
+            # Move image file
+            img_path = file_grouping.filePath
+            print(f"image_path: {img_path}\ntarget_img_path: {target_images_dir}\n")
+            target_img_path = target_images_dir / img_path.name
+            if img_path.exists() and img_path.parent != target_images_dir:
+                shutil.move(str(img_path), str(target_images_dir))
+
+            # Move label file
+            label_path = file_grouping.labelPath
+            print(f"label_path: {label_path}\ntarget_img_path: {target_labels_dir}\n")
+            target_label_path = target_labels_dir / label_path.name
+            if label_path.exists() and label_path.parent != target_labels_dir:
+                shutil.move(str(label_path), str(target_labels_dir))
+
+    try:
+        configuration = Configuration("config.json")
+        redistribute_images(configuration)
+    except ValueError as e:
+        print(f"Invalid Configuration Data: {e}")
+
+
+
+    # Examine Datastructure 
     for _split in ["train", "valid", "test"]:
         _img_path = DATASET_ROOT / _split / "images"
         _label_path = DATASET_ROOT / _split / "labels"
@@ -498,14 +635,7 @@ def _(cv2):
 
 
 @app.cell
-def _(
-    BBOX_COLORS,
-    CLASS_NAMES,
-    TRAINING_IMAGES_PATH,
-    TRAINING_LABELS_PATH,
-    draw_boxes_on_image,
-    plt,
-):
+def _(BBOX_COLORS, CLASS_NAMES, SAMPLE, draw_boxes_on_image, plt):
     print("=" * 50)
     print("VISUALIZING SAMPLE IMAGES")
     print("=" * 50)
