@@ -4,26 +4,6 @@ __generated_with = "0.17.2"
 app = marimo.App(width="full", auto_download=["ipynb"])
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(
-        """
-    # YOLOv8 PPE Detection: Training Comparison & Analysis
-
-    **Authors**: MYKOLA VASKEVYCH (22372199), Teammate Name (ID2)
-
-    **Purpose**: Compare 100-epoch vs 500-epoch training to analyze:
-    - Overfitting detection and characterization
-    - Convergence behavior and optimal stopping point
-    - Performance metrics evolution
-    - Hyperparameter impact analysis for CS4287 Assignment 1 Section 8
-
-    **Status**: All code executes to completion: YES
-    """
-    )
-    return
-
-
 @app.cell
 def _():
     import marimo as mo
@@ -53,36 +33,12 @@ def _(Path):
     MODEL_25 = RUNS_DIR / "best_25.pt"
     MODEL_50 = RUNS_DIR / "best_50.pt"
     MODEL_100 = RUNS_DIR / "best_100.pt"
-
-    # Class names for PPE detection
-    CLASS_NAMES = {
-        0: "Hardhat",
-        1: "Mask",
-        2: "NO-Hardhat",
-        3: "NO-Mask",
-        4: "NO-Safety Vest",
-        5: "Person",
-        6: "Safety Cone",
-        7: "Safety Vest",
-        8: "machinery",
-        9: "vehicle",
-    }
-
-    print("✓ Paths configured")
-    print(f"  100-epoch results: {RUN_100_DIR.exists()}")
-    print(f"  500-epoch results: {RUN_500_DIR.exists()}")
     return RUN_100_DIR, RUN_500_DIR
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        """
-    ## 1. Data Loading & Overview
-
-    Load training results from CSV files and create overview comparison.
-    """
-    )
+    mo.md("""## 1. Data Loading & Overview""")
     return
 
 
@@ -91,9 +47,6 @@ def _(RUN_100_DIR, RUN_500_DIR, pl):
     # Load results CSVs
     df_100 = pl.read_csv(RUN_100_DIR / "results.csv")
     df_500 = pl.read_csv(RUN_500_DIR / "results.csv")
-
-    print(f"100-epoch training: {len(df_100)} epochs recorded")
-    print(f"500-epoch training: {len(df_500)} epochs recorded")
 
     # Display first few rows
     df_100.head()
@@ -130,7 +83,7 @@ def _(RUN_100_DIR, RUN_500_DIR, yaml):
     for param in key_params:
         val_100 = args_100.get(param, "N/A")
         val_500 = args_500.get(param, "N/A")
-        match = "✓" if val_100 == val_500 else "✗ DIFF"
+        match = "✓" if val_100 == val_500 else "DIFF"
         print(f"{param:<20} {str(val_100):<20} {str(val_500):<20} {match:<10}")
     return
 
@@ -1186,14 +1139,6 @@ def _(Path):
     DATASET_YAML = Path.cwd() / "data" / "archive" / "css-data" / "data.yaml"
     PRETRAINED_MODEL = "yolov8n.pt"
 
-    print("=" * 80)
-    print("HYPERPARAMETER EXPERIMENTS CONFIGURED")
-    print("=" * 80)
-    for _exp_id, _exp in EXPERIMENTS.items():
-        _status = "✓ EXISTS" if _exp["skip"] else "⏳ TO RUN"
-        print(f"\n{_status} | {_exp_id}: {_exp['description']}")
-        print(f"  Run name: {_exp['name']}")
-        print(f"  Params: {_exp['params']}")
     return DATASET_YAML, EXPERIMENTS, PRETRAINED_MODEL
 
 
@@ -1203,8 +1148,6 @@ def _(mo):
         """
     ## 17. Run Hyperparameter Experiments
 
-    **WARNING**: Training will take several hours depending on your GPU.
-    Click the button below to start training all experiments.
     """
     )
     return
@@ -1223,7 +1166,7 @@ def _():
 
 @app.cell
 def _(mo):
-    train_experiments_btn = mo.ui.run_button(label="🚀 Train All Experiments", kind="danger")
+    train_experiments_btn = mo.ui.run_button(label="Train All Experiments", kind="danger")
     train_experiments_btn
     return (train_experiments_btn,)
 
@@ -1367,109 +1310,6 @@ def _(mo):
     ## 18. Multi-Run Comparison Dashboard
 
     Compare all hyperparameter experiments side-by-side.
-    """
-    )
-    return
-
-
-@app.cell
-def _(Path, pl):
-
-    import json
-    _saved_dir = Path("runs/saved")
-    _all_runs = [d for d in _saved_dir.iterdir() if d.is_dir() and (d / "summary.json").exists()]
-    _legacy_runs = [d for d in _saved_dir.iterdir() if d.is_dir() and (d / "results.csv").exists() and not (d / "summary.json").exists()]
-
-    print(f"Found {len(_all_runs)} runs with summaries")
-    print(f"Found {len(_legacy_runs)} legacy runs (100, 500)")
-
-    _comparison_data = []
-
-    for _run_dir in _all_runs:
-        try:
-            with open(_run_dir / "summary.json", "r") as _f:
-                _content = _f.read().strip()
-                if not _content:
-                    print(f"⚠ Warning: Empty summary.json in {_run_dir.name}, skipping...")
-                    continue
-                _summary = json.loads(_content)
-                _comparison_data.append({
-                    "Run": _summary["run_name"],
-                    "Description": _summary["description"],
-                    "LR": _summary["parameters"]["lr0"],
-                    "Batch": _summary["parameters"]["batch"],
-                    "Dropout": _summary["parameters"]["dropout"],
-                    "Mosaic": _summary["parameters"]["mosaic"],
-                    "Duration (h)": f"{_summary['duration_hours']:.2f}",
-                    "mAP50": f"{_summary['final_metrics']['mAP50']:.4f}",
-                    "mAP50-95": f"{_summary['final_metrics']['mAP50-95']:.4f}",
-                    "Precision": f"{_summary['final_metrics']['precision']:.4f}",
-                    "Recall": f"{_summary['final_metrics']['recall']:.4f}",
-                })
-        except json.JSONDecodeError as e:
-            print(f"⚠ Warning: Invalid JSON in {_run_dir.name}/summary.json - {e}, skipping...")
-            continue
-        except KeyError as e:
-            print(f"⚠ Warning: Missing key {e} in {_run_dir.name}/summary.json, skipping...")
-            continue
-
-    for _run_dir in _legacy_runs:
-        try:
-            _results = pl.read_csv(_run_dir / "results.csv")
-            _final = _results.tail(1)
-            _comparison_data.append({
-                "Run": _run_dir.name,
-                "Description": f"Baseline {_run_dir.name.split('_')[1]} epochs",
-                "LR": 0.01,
-                "Batch": 16,
-                "Dropout": 0.0,
-                "Mosaic": 1.0,
-                "Duration (h)": f"{_final['time'][0] / 3600:.2f}",
-                "mAP50": f"{_final['metrics/mAP50(B)'][0]:.4f}",
-                "mAP50-95": f"{_final['metrics/mAP50-95(B)'][0]:.4f}",
-                "Precision": f"{_final['metrics/precision(B)'][0]:.4f}",
-                "Recall": f"{_final['metrics/recall(B)'][0]:.4f}",
-            })
-        except Exception as e:
-            print(f"⚠ Warning: Error processing {_run_dir.name} - {e}, skipping...")
-            continue
-
-    if _comparison_data:
-        comparison_df = pl.DataFrame(_comparison_data)
-        print("\n" + "=" * 80)
-        print("ALL EXPERIMENTS COMPARISON")
-        print("=" * 80)
-        comparison_df
-    else:
-        print("No experiments found. Run training first!")
-
-    return (json,)
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        """
-    ---
-
-    ## Analysis Complete
-
-    **Next Steps:**
-    1. Review all experiment results in the comparison table above
-    2. Read all summary.txt files for detailed AI analysis
-    3. Include key plots and tables in your report Section 6-8
-    4. Discuss overfitting findings and optimal training strategy
-
-    **For maximum marks (Section 8 - 3 marks):**
-    - Show at least 3-4 different hyperparameter variations ✓
-    - Analyze impact on convergence, performance, and training time ✓
-    - Discuss tradeoffs and provide recommendations ✓
-    - Cite specific numbers from this analysis ✓
-
-    **AI-Readable Data:**
-    - experiment_log.txt: Training logs with key milestones
-    - runs/saved/*/summary.txt: Human-readable summaries for each run
-    - runs/saved/*/summary.json: Machine-readable data for analysis
     """
     )
     return

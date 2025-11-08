@@ -26,12 +26,12 @@ def _():
     import numpy as np
     from ultralytics import YOLO  # type: ignore
     from collections import Counter, defaultdict
-    from bokeh.plotting import figure, show, output_notebook
-    from bokeh.layouts import column
-    from PIL import Image
     import torch
     from prettytable import PrettyTable
     from prettytable import TableStyle
+    import polars as pl
+    import yaml
+    import seaborn as sns
     return (
         Counter,
         Path,
@@ -42,9 +42,12 @@ def _():
         defaultdict,
         mpimg,
         np,
+        pl,
         plt,
         random,
+        sns,
         torch,
+        yaml,
     )
 
 
@@ -56,25 +59,8 @@ def _(TableStyle):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-    # CHECKS & SETTINGS
-    ## NOTE: CHECK CONSTANTS BELOW TO ENSURE CORRECTNESS BEFORE RUNNING THE NOTEBOOK.
-
-    ** Navigation**: [Jump to Train Button](#training-configuration)
-    """
-    )
+    mo.md(r"""# CHECKS & SETTINGS""")
     return
-
-
-@app.cell
-def _(mo):
-    regenerate_yaml = mo.ui.checkbox(
-        label="# Regenerate YAML file (uncheck to skip if file is correct)",
-        value=False,
-    )
-    regenerate_yaml
-    return (regenerate_yaml,)
 
 
 @app.cell(hide_code=True)
@@ -184,44 +170,6 @@ def _(mo):
 
 
 @app.cell
-def _(
-    CLASS_NAMES,
-    DATASET_ROOT,
-    TEST_IMAGES_PATH,
-    TRAINING_IMAGES_PATH,
-    VALIDATION_IMAGES_PATH,
-    YAML_CONFIG_PATH,
-    regenerate_yaml,
-):
-    # Generate YAML using CLASS_NAMES constant to ensure consistency
-    _names_yaml = "\n  ".join([f"{k}: {v}" for k, v in CLASS_NAMES.items()])
-
-    _yaml_content = f"""path: {DATASET_ROOT.resolve()}
-    train: train/images
-    val: valid/images
-    test: test/images
-
-    nc: {len(CLASS_NAMES)}
-    names:
-      {_names_yaml}
-    """
-
-    if regenerate_yaml.value:
-        with open(YAML_CONFIG_PATH, "w") as _f:
-            _f.write(_yaml_content)
-        print(" Generated data.yaml:")
-        print(_yaml_content)
-    else:
-        print(" Skipped YAML generation (using existing file)")
-
-    print("\nVerifying paths:")
-    print(f"Train exists: {TRAINING_IMAGES_PATH.exists()}")
-    print(f"Val exists: {VALIDATION_IMAGES_PATH.exists()}")
-    print(f"Test exists: {TEST_IMAGES_PATH.exists()}")
-    return
-
-
-@app.cell
 def _(mo):
     mo.md(
         r"""
@@ -254,93 +202,66 @@ def _(RANDOM_SEED, torch):
         _vram_gb = torch.cuda.get_device_properties(0).total_memory / 1024**3
     else:
         DEVICE = "cpu"
-    return (DEVICE,)
+    return
 
 
 @app.cell
 def _(Path):
-    # Dataset paths
     DATASET_ROOT = Path.cwd() / "data" / "archive" / "css-data"
     TRAINING_IMAGES_PATH = (DATASET_ROOT / "train" / "images").resolve()
     TRAINING_LABELS_PATH = (DATASET_ROOT / "train" / "labels").resolve()
     VALIDATION_IMAGES_PATH = (DATASET_ROOT / "valid" / "images").resolve()
-    VALIDATION_LABELS_PATH = (DATASET_ROOT / "valid" / "labels").resolve()
     TEST_IMAGES_PATH = (DATASET_ROOT / "test" / "images").resolve()
-    TEST_LABELS_PATH = (DATASET_ROOT / "test" / "labels").resolve()
     YAML_CONFIG_PATH = DATASET_ROOT / "data.yaml"
-
-    # Model paths
     PRETRAINED_MODEL_PATH = "yolov8n.pt"
-    TRAINING_OUTPUT_DIR = "runs/train"
-    TRAINING_RUN_NAME = "ppe_detection"
-    TRAINED_MODEL_PATH = (
-        Path(TRAINING_OUTPUT_DIR) / TRAINING_RUN_NAME / "weights" / "best.pt"
-    )
     return (
         DATASET_ROOT,
         PRETRAINED_MODEL_PATH,
         TEST_IMAGES_PATH,
-        TRAINED_MODEL_PATH,
         TRAINING_IMAGES_PATH,
         TRAINING_LABELS_PATH,
-        TRAINING_OUTPUT_DIR,
-        TRAINING_RUN_NAME,
-        VALIDATION_IMAGES_PATH,
-        YAML_CONFIG_PATH,
     )
 
 
 @app.cell
 def _():
-    # Training parameters
-    EPOCHS = 500  # Reduce to 10 for quick testing or CPU training
-    IMAGE_SIZE = 640  # YOLO standard input size
-    BATCH_SIZE = 16  # Reduce to 4-8 for low VRAM or CPU
-
-    # Detection parameters
-    CONFIDENCE_THRESHOLD = 0.25  # Minimum confidence for detections (0.0-1.0)
-    return BATCH_SIZE, CONFIDENCE_THRESHOLD, EPOCHS, IMAGE_SIZE
-
-
-@app.cell
-def _():
-    # Visualization parameters
+    CONFIDENCE_THRESHOLD = 0.25
     NUM_SAMPLE_IMAGES = 6
     NUM_COMPARISON_IMAGES = 4
     NUM_BASELINE_TEST_SAMPLES = 3
-    return NUM_BASELINE_TEST_SAMPLES, NUM_COMPARISON_IMAGES, NUM_SAMPLE_IMAGES
+    IMAGE_SIZE = 640
+    SAVED_RUNS_DIR = "runs/saved_2"
+    return CONFIDENCE_THRESHOLD, NUM_BASELINE_TEST_SAMPLES, NUM_SAMPLE_IMAGES
 
 
 @app.cell
-def _(
-    BATCH_SIZE,
-    CONFIDENCE_THRESHOLD,
-    DEVICE,
-    EPOCHS,
-    IMAGE_SIZE,
-    PrettyTable,
-    TABLES_STYLE,
-    mo,
-):
-    # Display configuration summary
-    _table = PrettyTable()
-    _table.field_names = ["Parameter", "Value", "Description"]
-    _table.add_rows(
-        [
-            ["Device", f"`{DEVICE}`", "Training device (0=GPU, 'cpu'=CPU)"],
-            ["Epochs", f"`{EPOCHS}`", "Training iterations through dataset"],
-            ["Image Size", f"`{IMAGE_SIZE}px`", "Input resolution"],
-            ["Batch Size", f"`{BATCH_SIZE}`", "Images per training step"],
-            [
-                "Confidence",
-                f"`{CONFIDENCE_THRESHOLD}`",
-                "Min score for detections",
-            ],
-        ]
-    )
-    _table.set_style(TABLES_STYLE)
-    mo.md(_table.get_string())
-    return
+def _(YOLO):
+    def train_model(
+        epochs,
+        batch,
+        lr0=0.01,
+        dropout=0.0,
+        mosaic=1.0,
+        name="experiment",
+        project="runs/saved_2",
+    ):
+        model = YOLO("yolov8n.pt")
+        results = model.train(
+            data="data/archive/css-data/data.yaml",
+            epochs=epochs,
+            imgsz=640,
+            batch=batch,
+            device=0,
+            project=project,
+            name=name,
+            lr0=lr0,
+            dropout=dropout,
+            mosaic=mosaic,
+            patience=100,
+            save=True,
+        )
+        return results
+    return (train_model,)
 
 
 @app.cell
@@ -606,7 +527,7 @@ def _(
     print("  Orange: Safety Cone")
     print("  Gray: Machinery")
     print("  Blue: Vehicle")
-    return (CLASS_NAMES,)
+    return
 
 
 @app.cell
@@ -739,44 +660,153 @@ def _(
 
 @app.cell
 def _(mo):
-    train_button = mo.ui.run_button(label="Train Model")
-    train_button
-    return (train_button,)
+    mo.md(
+        r"""
+    ## Training Experiments
+
+    Run various experiments with different hyperparameters. Each experiment saves to runs/saved_2.
+    """
+    )
+    return
 
 
 @app.cell
-def _(
-    BATCH_SIZE,
-    DEVICE,
-    EPOCHS,
-    IMAGE_SIZE,
-    TRAINING_OUTPUT_DIR,
-    TRAINING_RUN_NAME,
-    YAML_CONFIG_PATH,
-    mo,
-    pretrained_model,
-    train_button,
-):
-    mo.stop(
-        not train_button.value,
-        mo.md("Press 'Train Model' button to start training"),
-    )
+def _(mo):
+    mo.md(r"""### Baseline (100 epochs, batch=16, lr=0.01)""")
+    return
 
-    print(f"Training with parameters:")
-    print(f"  Epochs: {EPOCHS}")
-    print(f"  Image Size: {IMAGE_SIZE}")
-    print(f"  Batch Size: {BATCH_SIZE}")
-    print(f"  Device: {DEVICE}")
 
-    training_results = pretrained_model.train(
-        data=str(YAML_CONFIG_PATH),
-        epochs=EPOCHS,
-        imgsz=IMAGE_SIZE,
-        batch=BATCH_SIZE,
-        device=DEVICE,
-        project=TRAINING_OUTPUT_DIR,
-        name=TRAINING_RUN_NAME,
-    )
+@app.cell
+def _(mo):
+    train_baseline = mo.ui.run_button(label="Train Baseline")
+    train_baseline
+    return (train_baseline,)
+
+
+@app.cell
+def _(mo, train_baseline, train_model):
+    mo.stop(not train_baseline.value)
+    train_model(epochs=100, batch=16, name="ppe_100")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Batch Size 8""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_batch8 = mo.ui.run_button(label="Train Batch=8")
+    train_batch8
+    return (train_batch8,)
+
+
+@app.cell
+def _(mo, train_batch8, train_model):
+    mo.stop(not train_batch8.value)
+    train_model(epochs=100, batch=8, name="ppe_100_batch_8")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### No Mosaic Augmentation""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_no_mosaic = mo.ui.run_button(label="Train No Mosaic")
+    train_no_mosaic
+    return (train_no_mosaic,)
+
+
+@app.cell
+def _(mo, train_model, train_no_mosaic):
+    mo.stop(not train_no_mosaic.value)
+    train_model(epochs=100, batch=16, mosaic=0.0, name="ppe_100_no_mosaic")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Learning Rate 0.001""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_lr001 = mo.ui.run_button(label="Train LR=0.001")
+    train_lr001
+    return (train_lr001,)
+
+
+@app.cell
+def _(mo, train_lr001, train_model):
+    mo.stop(not train_lr001.value)
+    train_model(epochs=100, batch=16, lr0=0.001, name="ppe_100_lr_0.001")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Learning Rate 0.02""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_lr002 = mo.ui.run_button(label="Train LR=0.02")
+    train_lr002
+    return (train_lr002,)
+
+
+@app.cell
+def _(mo, train_lr002, train_model):
+    mo.stop(not train_lr002.value)
+    train_model(epochs=100, batch=16, lr0=0.02, name="ppe_100_lr_0.02")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Dropout 0.2""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_dropout = mo.ui.run_button(label="Train Dropout=0.2")
+    train_dropout
+    return (train_dropout,)
+
+
+@app.cell
+def _(mo, train_dropout, train_model):
+    mo.stop(not train_dropout.value)
+    train_model(epochs=100, batch=16, dropout=0.2, name="ppe_100_dropout_0.2")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Combined Best (batch=8, no mosaic, 750 epochs)""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_combined = mo.ui.run_button(label="Train Combined Best")
+    train_combined
+    return (train_combined,)
+
+
+@app.cell
+def _(mo, train_combined, train_model):
+    mo.stop(not train_combined.value)
+    train_model(epochs=750, batch=8, mosaic=0.0, name="ppe_750_combined")
     return
 
 
@@ -784,200 +814,648 @@ def _(
 def _(mo):
     mo.md(
         r"""
-    ## Training Results Analysis
+    ## Experiment Analysis
 
-    Load trained model and visualize training metrics, confusion matrix, and validation predictions.
+    comparison of all training runs in configurations.
     """
     )
     return
 
 
 @app.cell
-def _(TRAINED_MODEL_PATH, YOLO, mo):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md(
-            f"**Trained model not found at `{TRAINED_MODEL_PATH}`. Please train the model first.**"
-        ),
-    )
-
-    trained_model = YOLO(TRAINED_MODEL_PATH)
-    print(f"Loaded trained model from: {TRAINED_MODEL_PATH}")
-    return (trained_model,)
+def _(Path, mo):
+    runs_dir = Path("runs/saved_2")
+    if not runs_dir.exists():
+        runs_dir.mkdir(parents=True, exist_ok=True)
+    run_names = [
+        d.name
+        for d in runs_dir.iterdir()
+        if d.is_dir() and d.name.startswith("ppe_")
+    ]
+    if not run_names:
+        mo.md("**No training runs found yet. Run experiments above first.**")
+    return run_names, runs_dir
 
 
 @app.cell
-def _(TRAINED_MODEL_PATH, mo, mpimg, plt):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md("**Train the model first to see results.**"),
-    )
+def _(pl, yaml):
+    def load_run_data(run_dir):
+        results = pl.read_csv(run_dir / "results.csv")
+        with open(run_dir / "args.yaml") as f:
+            args = yaml.safe_load(f)
+        return results, args
+    return (load_run_data,)
 
-    _results_dir = TRAINED_MODEL_PATH.parent.parent
 
-    _fig, _axes = plt.subplots(2, 2, figsize=(15, 12))
+@app.cell
+def _(load_run_data, mo, run_names, runs_dir):
+    mo.stop(len(run_names) == 0)
+    all_runs = {}
+    for _name in sorted(run_names):
+        _run_path = runs_dir / _name
+        _results, _args = load_run_data(_run_path)
+        all_runs[_name] = {"results": _results, "args": _args}
+    return (all_runs,)
 
-    _images_to_show = [
-        ("results.png", "Training Metrics"),
-        ("confusion_matrix_normalized.png", "Confusion Matrix"),
-        ("val_batch0_labels.jpg", "Validation: Ground Truth"),
-        ("val_batch0_pred.jpg", "Validation: Predictions"),
+
+@app.cell
+def _(PrettyTable, TABLES_STYLE, all_runs, mo):
+    params_table = PrettyTable()
+    params_table.field_names = [
+        "Run",
+        "Epochs",
+        "Batch",
+        "LR",
+        "Dropout",
+        "Mosaic",
     ]
 
-    for _idx, (_img_name, _title) in enumerate(_images_to_show):
-        _img_path = _results_dir / _img_name
-        if _img_path.exists():
-            _img = mpimg.imread(str(_img_path))
-            _axes[_idx // 2, _idx % 2].imshow(_img)
-            _axes[_idx // 2, _idx % 2].set_title(_title)
-            _axes[_idx // 2, _idx % 2].axis("off")
+    for _name, _data in sorted(all_runs.items()):
+        _args = _data["args"]
+        params_table.add_row(
+            [
+                _name.replace("ppe_", ""),
+                _args["epochs"],
+                _args["batch"],
+                _args["lr0"],
+                _args["dropout"],
+                _args["mosaic"],
+            ]
+        )
 
-    plt.tight_layout()
-    plt.gca()
+    params_table.set_style(TABLES_STYLE)
+    mo.md(f"""
+    ### Training Parameters
+
+    {params_table.get_string()}
+    """)
     return
 
 
 @app.cell
-def _(mo):
-    mo.md(
-        r"""
-    ## Detailed Training Metrics
-
-    Large-format visualizations for detailed analysis of training performance.
-    """
-    )
-    return
-
-
-@app.cell
-def _(TRAINED_MODEL_PATH, mo, mpimg, plt):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md("**Train the model first to see detailed results.**"),
-    )
-
-    _results_dir = TRAINED_MODEL_PATH.parent.parent
-
-    # Training Metrics
-    _fig1 = plt.figure(figsize=(20, 12))
-    _img1 = mpimg.imread(str(_results_dir / "results.png"))
-    plt.imshow(_img1)
-    plt.title("Training Metrics (Loss, Precision, Recall, mAP)", fontsize=16)
-    plt.axis("off")
-    plt.tight_layout()
-    plt.show()
-
-    # Confusion Matrix
-    _fig2 = plt.figure(figsize=(16, 16))
-    _img2 = mpimg.imread(str(_results_dir / "confusion_matrix_normalized.png"))
-    plt.imshow(_img2)
-    plt.title("Confusion Matrix (Normalized)", fontsize=16)
-    plt.axis("off")
-    plt.tight_layout()
-    plt.show()
-
-    # Validation Comparison
-    _fig3, _axes3 = plt.subplots(1, 2, figsize=(24, 12))
-    _img_labels = mpimg.imread(str(_results_dir / "val_batch0_labels.jpg"))
-    _img_preds = mpimg.imread(str(_results_dir / "val_batch0_pred.jpg"))
-
-    _axes3[0].imshow(_img_labels)
-    _axes3[0].set_title("Validation: Ground Truth Labels", fontsize=14)
-    _axes3[0].axis("off")
-
-    _axes3[1].imshow(_img_preds)
-    _axes3[1].set_title("Validation: Model Predictions", fontsize=14)
-    _axes3[1].axis("off")
-
-    plt.tight_layout()
-    plt.gca()
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    ## Model Comparison: Pre-trained vs Fine-tuned
-
-    Side-by-side comparison of COCO pre-trained model vs PPE fine-tuned model on test images.
-    """
-    )
-    return
-
-
-@app.cell
-def _(
-    CONFIDENCE_THRESHOLD,
-    NUM_COMPARISON_IMAGES,
-    TEST_IMAGES_PATH,
-    TRAINED_MODEL_PATH,
-    cv2,
-    mo,
-    plt,
-    pretrained_model,
-    trained_model,
-):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md("**Train the model first to see comparison.**"),
-    )
-
-    _comparison_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[
-        :NUM_COMPARISON_IMAGES
+def _(PrettyTable, TABLES_STYLE, all_runs, mo):
+    results_table = PrettyTable()
+    results_table.field_names = [
+        "Run",
+        "Precision",
+        "Recall",
+        "mAP50",
+        "mAP50-95",
+        "Val Loss",
     ]
 
-    _fig, _axes = plt.subplots(2, 4, figsize=(20, 10))
-
-    for _idx, _img_file in enumerate(_comparison_images):
-        # Pre-trained COCO model
-        _results_pretrained = pretrained_model.predict(
-            str(_img_file), conf=CONFIDENCE_THRESHOLD, verbose=False
+    for _name, _data in sorted(all_runs.items()):
+        _final = _data["results"].tail(1)
+        results_table.add_row(
+            [
+                _name.replace("ppe_", ""),
+                f"{_final['metrics/precision(B)'][0]:.4f}",
+                f"{_final['metrics/recall(B)'][0]:.4f}",
+                f"{_final['metrics/mAP50(B)'][0]:.4f}",
+                f"{_final['metrics/mAP50-95(B)'][0]:.4f}",
+                f"{_final['val/box_loss'][0]:.4f}",
+            ]
         )
-        _img_pretrained = _results_pretrained[0].plot()
-        _img_pretrained_rgb = cv2.cvtColor(_img_pretrained, cv2.COLOR_BGR2RGB)
 
-        # Fine-tuned PPE model
-        _results_finetuned = trained_model.predict(
-            str(_img_file), conf=CONFIDENCE_THRESHOLD, verbose=False
-        )
-        _img_finetuned = _results_finetuned[0].plot()
-        _img_finetuned_rgb = cv2.cvtColor(_img_finetuned, cv2.COLOR_BGR2RGB)
+    results_table.set_style(TABLES_STYLE)
+    mo.md(f"""
+    ### Final Results
 
-        # Display
-        _axes[0, _idx].imshow(_img_pretrained_rgb)
-        _axes[0, _idx].set_title(
-            f"COCO: {len(_results_pretrained[0].boxes)} detections", fontsize=10
-        )
-        _axes[0, _idx].axis("off")
+    {results_table.get_string()}
+    """)
+    return
 
-        _axes[1, _idx].imshow(_img_finetuned_rgb)
-        _axes[1, _idx].set_title(
-            f"PPE: {len(_results_finetuned[0].boxes)} detections", fontsize=10
-        )
-        _axes[1, _idx].axis("off")
 
-    _fig.text(
-        0.02,
-        0.75,
-        "Pre-trained\n(COCO)",
-        fontsize=14,
-        weight="bold",
-        va="center",
-        rotation=90,
-    )
-    _fig.text(
-        0.02,
-        0.25,
-        "Fine-tuned\n(PPE)",
-        fontsize=14,
-        weight="bold",
-        va="center",
-        rotation=90,
-    )
+@app.cell
+def _(all_runs, plt, sns):
+    sns.set_style("whitegrid")
+
+    _fig, _axes = plt.subplots(2, 2, figsize=(15, 10))
+
+    _metrics = [
+        ("metrics/precision(B)", "Precision", _axes[0, 0]),
+        ("metrics/recall(B)", "Recall", _axes[0, 1]),
+        ("metrics/mAP50(B)", "mAP50", _axes[1, 0]),
+        ("metrics/mAP50-95(B)", "mAP50-95", _axes[1, 1]),
+    ]
+
+    for _metric_name, _label, _ax in _metrics:
+        for _name, _data in sorted(all_runs.items()):
+            _results = _data["results"]
+            _ax.plot(
+                _results["epoch"],
+                _results[_metric_name],
+                label=_name.replace("ppe_", ""),
+                linewidth=2,
+            )
+
+        _ax.set_xlabel("Epoch")
+        _ax.set_ylabel(_label)
+        _ax.set_title(f"{_label} Over Training")
+        _ax.legend(loc="best", fontsize=8)
+        _ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
     plt.gca()
+    return
+
+
+@app.cell
+def _(all_runs, plt):
+    _fig, _axes = plt.subplots(1, 2, figsize=(15, 5))
+
+    for _name, _data in sorted(all_runs.items()):
+        _results = _data["results"]
+        _axes[0].plot(
+            _results["epoch"],
+            _results["train/box_loss"],
+            label=_name.replace("ppe_", ""),
+            linewidth=2,
+        )
+        _axes[1].plot(
+            _results["epoch"],
+            _results["val/box_loss"],
+            label=_name.replace("ppe_", ""),
+            linewidth=2,
+        )
+
+    _axes[0].set_xlabel("Epoch")
+    _axes[0].set_ylabel("Loss")
+    _axes[0].set_title("Training Box Loss")
+    _axes[0].legend(loc="best", fontsize=8)
+    _axes[0].grid(True, alpha=0.3)
+
+    _axes[1].set_xlabel("Epoch")
+    _axes[1].set_ylabel("Loss")
+    _axes[1].set_title("Validation Box Loss")
+    _axes[1].legend(loc="best", fontsize=8)
+    _axes[1].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(all_runs, np, plt):
+    _fig, _ax = plt.subplots(figsize=(10, 6))
+
+    _run_labels = []
+    _map50_values = []
+    _map50_95_values = []
+
+    for _name, _data in sorted(all_runs.items()):
+        _final = _data["results"].tail(1)
+        _run_labels.append(_name.replace("ppe_", ""))
+        _map50_values.append(_final["metrics/mAP50(B)"][0])
+        _map50_95_values.append(_final["metrics/mAP50-95(B)"][0])
+
+    _x = np.arange(len(_run_labels))
+    _width = 0.35
+
+    _ax.bar(_x - _width / 2, _map50_values, _width, label="mAP50", alpha=0.8)
+    _ax.bar(_x + _width / 2, _map50_95_values, _width, label="mAP50-95", alpha=0.8)
+
+    _ax.set_ylabel("mAP Score")
+    _ax.set_title("Final mAP Comparison Across Runs")
+    _ax.set_xticks(_x)
+    _ax.set_xticklabels(_run_labels, rotation=45, ha="right")
+    _ax.legend()
+    _ax.grid(True, alpha=0.3, axis="y")
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Metric Explanations
+
+    **Precision**: What percentage of predicted PPE violations are actually violations. High precision means fewer false alarms.
+
+    **Recall**: What percentage of actual violations did we catch. High recall means we don't miss violations.
+
+    **mAP50**: Mean Average Precision at 50% IoU threshold. Measures detection accuracy when bounding boxes overlap at least 50% with ground truth. Standard metric for object detection.
+
+    **mAP50-95**: Average of mAP at IoU thresholds from 50% to 95%. Stricter metric that requires more accurate bounding boxes. Better indicator of overall model quality.
+
+    **Box Loss**: How well predicted bounding boxes match ground truth locations. Lower is better.
+
+    **Class Loss**: Cross-entropy loss for object classification. Measures how confidently the model predicts the correct class.
+
+    **DFL Loss**: Distribution Focal Loss for box regression. Helps with more accurate bounding box localization.
+    """
+    )
+    return
+
+
+@app.cell
+def _(all_runs, mo, pl):
+    comparison_df = pl.DataFrame(
+        {
+            "Run": [name.replace("ppe_", "") for name in sorted(all_runs.keys())],
+            "Precision": [
+                all_runs[name]["results"]["metrics/precision(B)"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "Recall": [
+                all_runs[name]["results"]["metrics/recall(B)"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "mAP50": [
+                all_runs[name]["results"]["metrics/mAP50(B)"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "mAP50-95": [
+                all_runs[name]["results"]["metrics/mAP50-95(B)"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "BoxLoss": [
+                all_runs[name]["results"]["val/box_loss"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "ClsLoss": [
+                all_runs[name]["results"]["val/cls_loss"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+        }
+    )
+
+    mo.md(f"""
+    ### Detailed Comparison Table
+
+    {comparison_df}
+    """)
+    return
+
+
+@app.cell
+def _(all_runs, plt):
+    _fig, _axes = plt.subplots(2, 3, figsize=(18, 10))
+    _axes = _axes.flatten()
+
+    _metrics_to_plot = [
+        ("train/box_loss", "Training Box Loss"),
+        ("val/box_loss", "Validation Box Loss"),
+        ("train/cls_loss", "Training Class Loss"),
+        ("val/cls_loss", "Validation Class Loss"),
+        ("train/dfl_loss", "Training DFL Loss"),
+        ("val/dfl_loss", "Validation DFL Loss"),
+    ]
+
+    for _idx, (_metric, _title) in enumerate(_metrics_to_plot):
+        for _name, _data in sorted(all_runs.items()):
+            _results = _data["results"]
+            _axes[_idx].plot(
+                _results["epoch"],
+                _results[_metric],
+                label=_name.replace("ppe_", ""),
+                linewidth=2,
+                alpha=0.7,
+            )
+
+        _axes[_idx].set_xlabel("Epoch")
+        _axes[_idx].set_ylabel("Loss")
+        _axes[_idx].set_title(_title)
+        _axes[_idx].legend(loc="best", fontsize=7)
+        _axes[_idx].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Confusion Matrices Comparison
+
+    Confusion matrices show which classes the model confuses most often.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mpimg, plt, run_names, runs_dir):
+    _n_runs = len(run_names)
+    _fig, _axes = plt.subplots(_n_runs, 1, figsize=(12, 8 * _n_runs))
+    if _n_runs == 1:
+        _axes = [_axes]
+
+    for _idx, _name in enumerate(sorted(run_names)):
+        _cm_path = runs_dir / _name / "confusion_matrix_normalized.png"
+        if _cm_path.exists():
+            _img = mpimg.imread(str(_cm_path))
+            _axes[_idx].imshow(_img)
+            _axes[_idx].set_title(
+                f"{_name.replace('ppe_', '')} - Confusion Matrix", fontsize=14
+            )
+            _axes[_idx].axis("off")
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Precision-Recall Curves
+
+    Shows the tradeoff between precision and recall at different confidence thresholds.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mpimg, plt, run_names, runs_dir):
+    _n_runs = len(run_names)
+    _fig, _axes = plt.subplots(_n_runs, 1, figsize=(12, 6 * _n_runs))
+    if _n_runs == 1:
+        _axes = [_axes]
+
+    for _idx, _name in enumerate(sorted(run_names)):
+        _pr_path = runs_dir / _name / "BoxPR_curve.png"
+        if _pr_path.exists():
+            _img = mpimg.imread(str(_pr_path))
+            _axes[_idx].imshow(_img)
+            _axes[_idx].set_title(
+                f"{_name.replace('ppe_', '')} - PR Curve", fontsize=14
+            )
+            _axes[_idx].axis("off")
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### F1 Score Curves
+
+    F1 is the harmonic mean of precision and recall. Shows optimal confidence threshold.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mpimg, plt, run_names, runs_dir):
+    _n_runs = len(run_names)
+    _fig, _axes = plt.subplots(_n_runs, 1, figsize=(12, 6 * _n_runs))
+    if _n_runs == 1:
+        _axes = [_axes]
+
+    for _idx, _name in enumerate(sorted(run_names)):
+        _f1_path = runs_dir / _name / "BoxF1_curve.png"
+        if _f1_path.exists():
+            _img = mpimg.imread(str(_f1_path))
+            _axes[_idx].imshow(_img)
+            _axes[_idx].set_title(
+                f"{_name.replace('ppe_', '')} - F1 Curve", fontsize=14
+            )
+            _axes[_idx].axis("off")
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Training Metrics Over Time
+
+    Complete training history for each run.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mpimg, plt, run_names, runs_dir):
+    _n_runs = len(run_names)
+    _cols = 2
+    _rows = (_n_runs + 1) // 2
+    _fig, _axes = plt.subplots(_rows, _cols, figsize=(20, 10 * _rows))
+    _axes = _axes.flatten() if _n_runs > 1 else [_axes]
+
+    for _idx, _name in enumerate(sorted(run_names)):
+        _results_path = runs_dir / _name / "results.png"
+        if _results_path.exists():
+            _img = mpimg.imread(str(_results_path))
+            _axes[_idx].imshow(_img)
+            _axes[_idx].set_title(
+                f"{_name.replace('ppe_', '')}", fontsize=14, weight="bold"
+            )
+            _axes[_idx].axis("off")
+
+    for _idx in range(_n_runs, len(_axes)):
+        _axes[_idx].axis("off")
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Convergence Analysis
+
+    Checking if models converged or still improving at the end of training.
+    """
+    )
+    return
+
+
+@app.cell
+def _(PrettyTable, TABLES_STYLE, all_runs, mo, np):
+    convergence_table = PrettyTable()
+    convergence_table.field_names = [
+        "Run",
+        "Last 10 Avg mAP",
+        "Best mAP",
+        "Epochs to Best",
+        "Still Improving",
+    ]
+
+    for _name, _data in sorted(all_runs.items()):
+        _results = _data["results"]
+        _map_values = _results["metrics/mAP50-95(B)"]
+        _last_10_avg = np.mean(_map_values[-10:])
+        _best_map = np.max(_map_values)
+        _best_epoch = np.argmax(_map_values) + 1
+        _still_improving = "Yes" if _best_epoch > len(_map_values) - 10 else "No"
+
+        convergence_table.add_row(
+            [
+                _name.replace("ppe_", ""),
+                f"{_last_10_avg:.4f}",
+                f"{_best_map:.4f}",
+                _best_epoch,
+                _still_improving,
+            ]
+        )
+
+    convergence_table.set_style(TABLES_STYLE)
+    mo.md(f"""
+    {convergence_table.get_string()}
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Learning Rate Investigation
+
+    Checking if the learning rate runs actually used different learning rates.
+    """
+    )
+    return
+
+
+@app.cell
+def _(PrettyTable, TABLES_STYLE, all_runs, mo):
+    lr_check_table = PrettyTable()
+    lr_check_table.field_names = [
+        "Run",
+        "Config LR",
+        "Epoch 1 Actual LR",
+        "Epoch 10 Actual LR",
+        "Identical to 100?",
+    ]
+
+    _baseline_metrics = all_runs["ppe_100"]["results"].select(
+        ["train/box_loss", "val/box_loss", "metrics/mAP50(B)"]
+    )
+
+    for _name, _data in sorted(all_runs.items()):
+        if "100" not in _name:
+            continue
+        _results = _data["results"]
+        _args = _data["args"]
+        _config_lr = _args["lr0"]
+        _actual_lr_1 = _results["lr/pg0"][0]
+        _actual_lr_10 = _results["lr/pg0"][9] if len(_results) >= 10 else "N/A"
+
+        _current_metrics = _results.select(
+            ["train/box_loss", "val/box_loss", "metrics/mAP50(B)"]
+        )
+        _is_identical = (
+            "YES"
+            if _name != "ppe_100" and _current_metrics.equals(_baseline_metrics)
+            else "NO"
+        )
+
+        lr_check_table.add_row(
+            [
+                _name.replace("ppe_", ""),
+                _config_lr,
+                f"{_actual_lr_1:.6f}",
+                f"{_actual_lr_10:.6f}" if _actual_lr_10 != "N/A" else "N/A",
+                _is_identical,
+            ]
+        )
+
+    lr_check_table.set_style(TABLES_STYLE)
+    mo.md(f"""
+    {lr_check_table.get_string()}
+
+    **Finding**: The lr_0.001 and lr_0.02 runs show identical actual learning rates and identical metrics throughout training. This suggests these runs either:
+    - Were copied from the same source
+    - Had a bug where the lr0 parameter wasn't applied
+    - Were resumed from the same checkpoint
+
+    The dropout_0.2 run also appears to share identical metrics with some runs, indicating potential duplication.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Deep Analysis and Recommendations
+
+    **Best Overall Model: ppe_500**
+
+    The 500-epoch run dominates across all metrics. It achieved:
+    - Highest mAP50-95: 0.5499 (9% better than best 100-epoch run)
+    - Highest recall: 0.7564 (means catches more violations)
+    - Best precision: 0.9130 (fewer false alarms)
+    - Lowest validation losses across the board
+
+    Looking at convergence, the 500-epoch run was still improving at epoch 500, which suggests even more epochs could help.
+
+    **100-Epoch Analysis:**
+
+    Among 100-epoch runs, there's interesting variation:
+    - `no_mosaic` got best mAP50 (0.8255) and precision (0.9168) - suggests mosaic augmentation might be too aggressive for this dataset
+    - `batch_8` got second best mAP50-95 (0.5020) - smaller batches gave better gradient estimates
+    - `dropout_0.2` and the lr variations (0.001, 0.02) show IDENTICAL metrics to each other - these are likely duplicate/corrupted runs, not real experiments. The actual learning rates used during training were identical despite different config values.
+
+    **Why no_mosaic worked well:**
+    Mosaic augmentation creates synthetic images by combining 4 images. For PPE detection where context matters (construction sites, specific equipment), this might hurt performance by creating unrealistic scenes. The model might be learning wrong associations.
+
+    **What to Try Next:**
+
+    1. **More epochs**: The 500-epoch run hadn't plateaued. Try 750-1000 epochs with early stopping (patience=50).
+
+    2. **Combined best hyperparameters**: Run with batch_size=8, mosaic=0.0 for 500+ epochs. batch_8 and no_mosaic are the only validated improvements (dropout/lr runs were duplicates).
+
+    3. **Actually test learning rate and dropout**: The lr_0.001, lr_0.02, and dropout_0.2 runs appear to be corrupted/duplicates. Need to rerun these experiments properly to see their real effect.
+
+    4. **Different augmentations**: Instead of mosaic, try:
+       - Stronger color jitter (construction sites vary in lighting)
+       - Random crop/zoom (workers at different distances)
+       - Keep flip but add rotate
+
+    5. **Larger model**: We're using yolov8n (nano). Try yolov8s or yolov8m - more parameters might capture subtle PPE details better.
+
+    6. **Learning rate schedule**: The constant lr=0.01 worked but cosine annealing or OneCycleLR might help.
+
+    7. **Class balancing**: Looking at confusion matrices, some classes (NO-Hardhat, NO-Mask, NO-Safety Vest) are harder to detect. Try weighted loss or oversampling those classes.
+
+    8. **Two-stage training**: Train 500 epochs with defaults, then fine-tune 250 epochs without mosaic and batch_size=8.
+
+    **Valid Experiments So Far:**
+    - ppe_100 (baseline): mAP50-95 = 0.4515
+    - ppe_500 (more epochs): mAP50-95 = 0.5499 (BEST)
+    - ppe_100_batch_8: mAP50-95 = 0.5020 (good improvement)
+    - ppe_100_no_mosaic: mAP50-95 = 0.5046 (good improvement)
+
+    **Corrupted/Duplicate Runs** (need to redo):
+    - ppe_100_lr_0.001
+    - ppe_100_lr_0.02
+    - ppe_100_dropout_0.2
+
+    **Realistic Next Run:**
+    ```python
+    epochs=750
+    batch=8
+    mosaic=0.0
+    lr0=0.01
+    cos_lr=True
+    patience=75
+    ```
+
+    Expected: ~0.58-0.62 mAP50-95 based on combining the improvements from batch_8 and no_mosaic with extended training.
+    """
+    )
     return
 
 
