@@ -250,7 +250,7 @@ def _(YOLO):
             device=0,
             project=project,
             name=name,
-            exist_ok=True,
+            exist_ok=False,
             lr0=lr0,
             dropout=dropout,
             mosaic=mosaic,
@@ -289,6 +289,8 @@ def _(DATASET_ROOT, PrettyTable, TABLES_STYLE, mo):
     )
     _table.set_style(TABLES_STYLE)
     mo.md(_table.get_string())
+    print(len(list((DATASET_ROOT / "test" / "images").glob("*.jpg")))+len(list((DATASET_ROOT / "valid" / "images").glob("*.jpg")))+len(list((DATASET_ROOT / "train" / "images").glob("*.jpg"))))
+
     return
 
 
@@ -890,7 +892,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    train_baseline = mo.ui.run_button(label="Train Baseline")
+    train_baseline = mo.ui.run_button(label="Train Baseline", )
     train_baseline
     return (train_baseline,)
 
@@ -898,7 +900,7 @@ def _(mo):
 @app.cell
 def _(mo, train_baseline, train_model):
     mo.stop(not train_baseline.value)
-    train_model(epochs=100, batch=16, name="ppe_100", seed=42)
+    train_model(epochs=100, batch=16, name="ppe_100", seed=42, exist_ok=False)
     return
 
 
