@@ -1,4 +1,4 @@
-path: /home/guts/projects/college/cs4287-neurol-computing/cs4287_cnn/data/archive/css-data
+path: /home/nick/Documents/projects/uni_stuff/cnn/cs4287_cnn/data/archive/css-data
 train: train/images
 val: valid/images
 test: test/images

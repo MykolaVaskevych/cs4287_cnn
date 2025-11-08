@@ -190,11 +190,12 @@ def _(mo):
 
 
 @app.cell
-def _(Path, TableStyle, mo, np, random, torch):
-    """"
+def _(Path, PrettyTable, TableStyle, np, random, torch):
+    """ "
     Reproducibility
-    This section sets the random seeds used in each library throughout the notebook to allow for randomness while ensuring reproducibility 
+    This section sets the random seeds used in each library throughout the notebook to allow for randomness while ensuring reproducibility
     """
+
     RANDOM_SEED = 42
     random.seed(RANDOM_SEED)
     np.random.seed(RANDOM_SEED)
@@ -203,7 +204,7 @@ def _(Path, TableStyle, mo, np, random, torch):
     """"
     Traing Device
     This section uses PyTorch to detect the best available training device. If a CUDA driver for an NVIDIA GPU is found, that device will be used; otherwise, training will run on the CPU.  
-    You can override this autodetection by setting `DEVICE_OVERRIDE` to your preferred device — e.g., `"cpu"` or `0` for CUDA.
+    You can override this autodetection by setting 'DEVICE_OVERRIDE' to your preferred device — e.g., "cpu" or '0' for CUDA.
     """
     DEVICE_OVERRIDE = None
 
@@ -222,7 +223,7 @@ def _(Path, TableStyle, mo, np, random, torch):
         print(f"Recommended BATCH_SIZE: {16 if _vram_gb >= 8 else 8}")
     else:
         DEVICE = "cpu"
-        print("⚠ No GPU detected - training will be significantly slower")
+        print("No GPU detected - training will be significantly slower")
         print("Recommended: Reduce EPOCHS to 10 and BATCH_SIZE to 4 for CPU")
 
     """"
@@ -303,20 +304,22 @@ def _(Path, TableStyle, mo, np, random, torch):
     """
     Display configuration summary
     """
-    mo.md(
-        f"""
-        ## Current Configuration
-
-        | Parameter | Value | Description |
-        |-----------|-------|-------------|
-        | Device | `{DEVICE}` | Training device (0=GPU, 'cpu'=CPU) |
-        | Epochs | `{EPOCHS}` | Training iterations through dataset |
-        | Image Size | `{IMAGE_SIZE}px` | Input resolution |
-        | Batch Size | `{BATCH_SIZE}` | Images per training step |
-        | Confidence | `{CONFIDENCE_THRESHOLD}` | Min score for detections |
-
-        **Note**: Adjust BATCH_SIZE in constants cell if you get OOM (Out of Memory) errors.
-        """
+    _table = PrettyTable()
+    _table.field_names = ["Parameter", "Value", "Description"]
+    _table.add_rows(
+        [
+            ["Device", f"{DEVICE}", "Training device (0=GPU, 'cpu'=CPU)"],
+            ["Epochs", f"{EPOCHS}", "Training iterations through dataset"],
+            ["Image Size", f"{IMAGE_SIZE}px", "Input resolution"],
+            ["Batch Size", f"{BATCH_SIZE}", "Images per training step"],
+            ["Confidence", f"{CONFIDENCE_THRESHOLD}", "Min score for detections"],
+        ]
+    )
+    _table.set_style(TABLES_STYLE)
+    print("Current Configuration")
+    print(_table)
+    print(
+        "\nNote: Adjust BATCH_SIZE in constants cell if you get OOM (Out of Memory) errors."
     )
     return (
         BBOX_COLORS,
@@ -380,9 +383,9 @@ def _(
         )
         mo.stop(True, mo.md(_error_msg))
 
-    print("✓ All dataset paths validated successfully\n")
+    print("All dataset paths validated successfully\n")
 
-    # Generate YAML using CLASS_NAMES constant to ensure consistency
+    # Generate YAML using CLASS_NAMES constant
     _names_yaml = "\n  ".join([f"{k}: {v}" for k, v in CLASS_NAMES.items()])
 
     _yaml_content = f"""path: {DATASET_ROOT.resolve()}
@@ -397,7 +400,7 @@ def _(
 
     with open(YAML_CONFIG_PATH, "w") as _f:
         _f.write(_yaml_content)
-    print("✓ Generated data.yaml:")
+    print("Generated data.yaml:")
     print(_yaml_content)
     return
 
@@ -427,16 +430,19 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
             self.filePath = filePath
             self.labelPath = labelPath
 
+
     class Configuration:
         """
         Configuration
         An object containg relevant information from a passed json configuration file which defines the desired sturcture of the dataset
-        """ 
-        def __init__(self,configuration_path):
+        """
 
-            fileType = configuration_path[len(configuration_path) - 5:]
+        def __init__(self, configuration_path):
+            fileType = configuration_path[len(configuration_path) - 5 :]
             if fileType != ".json":
-                raise ValueError(f"Given filetype \"{fileType}\" But must be of type \"*.json\"")
+                raise ValueError(
+                    f'Given filetype "{fileType}" But must be of type "*.json"'
+                )
 
             with open(configuration_path, "r") as file:
                 fileContent = json.load(file)
@@ -445,7 +451,6 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
                 self.target = fileContent["targets"]
 
         def __repr__(self):
-
             reprString = "Source Folders\n"
             for source in self.source:
                 reprString += " - " + source + "\n"
@@ -453,9 +458,16 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
 
             reprString += "Target Folders\n"
             for target in self.target:
-                reprString += " - " + target["target path"] + " (" + target["distribution"] + " of total images)\n"
+                reprString += (
+                    " - "
+                    + target["target path"]
+                    + " ("
+                    + target["distribution"]
+                    + " of total images)\n"
+                )
 
             return reprString
+
 
     def get_file_hash(file_path):
         """Calculate MD5 hash of a file's contents."""
@@ -464,6 +476,7 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
             for chunk in iter(lambda: f.read(4096), b""):
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
+
 
     def redistribute_images(configuration):
         """
@@ -480,12 +493,17 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
 
         # Verify directories exist
         if not all(directory.exists() for directory in configuration.source):
-            print(f"Error: One or more of the specified source directories don't exist! {configuration.source}")
+            print(
+                f"Error: One or more of the specified source directories don't exist! {configuration.source}"
+            )
             return
-        if not all(Path(target["target path"]).exists() for target in configuration.target):
-            print(f"Error: One or more of the specified target directories don't exist! {configuration.source}")
+        if not all(
+            Path(target["target path"]).exists() for target in configuration.target
+        ):
+            print(
+                f"Error: One or more of the specified target directories don't exist! {configuration.source}"
+            )
             return
-
 
         # Collect all images from all directories
         all_images = []
@@ -493,15 +511,17 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
         seen_image_hashes = {}
 
         for directory in configuration.source:
-            directory = directory / 'images'
+            directory = directory / "images"
             count = 0
-            for file_path in directory.rglob('*'):
-
+            for file_path in directory.rglob("*"):
                 relative_path = file_path.relative_to(directory)
                 imagePath = directory / relative_path
-                labelPath = Path(str(imagePath)
-                                 .replace('/images/', '/labels/', 1)
-                                 .rsplit('.', 1)[0] + '.txt')
+                labelPath = Path(
+                    str(imagePath)
+                    .replace("/images/", "/labels/", 1)
+                    .rsplit(".", 1)[0]
+                    + ".txt"
+                )
 
                 image_hash = get_file_hash(imagePath)
                 if image_hash in seen_image_hashes:
@@ -510,7 +530,6 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
                     print()
                     continue
                 if imagePath.is_file() and labelPath.is_file():
-
                     file_grouping = FileGrouping(imagePath, labelPath)
                     all_images.append(file_grouping)
                     seen_image_hashes[image_hash] = imagePath
@@ -518,15 +537,18 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
 
             currentDistribution[directory] = count
 
-
         total_images = len(all_images)
         if total_images == 0:
-            raise ValueError(f"No images in the given source paths: {configuration.source}")
+            raise ValueError(
+                f"No images in the given source paths: {configuration.source}"
+            )
 
         print(f"Found {total_images} total images")
         print("Current Distribution:")
         for directory, fileCount in currentDistribution.items():
-            print(f"{" " * 4}{directory} contains {fileCount} files constituting ({fileCount / total_images}) of the full distribution (1.0)")
+            print(
+                f"{' ' * 4}{directory} contains {fileCount} files constituting ({fileCount / total_images}) of the full distribution (1.0)"
+            )
 
         # Shuffle images randomly
         print(f"\nShuffiling images ...")
@@ -535,16 +557,22 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
         # Re-distribute shuffeled images accross specified split
         print("Moving images...\n")
         for target in configuration.target:
-            images = all_images[:round(float(target["distribution"]) * total_images)] 
-            all_images = all_images[round(float(target["distribution"]) * total_images):] 
+            images = all_images[
+                : round(float(target["distribution"]) * total_images)
+            ]
+            all_images = all_images[
+                round(float(target["distribution"]) * total_images) :
+            ]
             move_images(images, Path(target["target path"]))
 
-
-        print("✓ Redistribution complete!")
+        print("Redistribution complete!")
 
         print(f"\nNew distribution:")
         for target in configuration.target:
-            print(f"{" " * 4}{target["target path"]} contains {float(target["distribution"]) * total_images} files constituting ({float(target["distribution"]) * total_images / total_images}) of the full distribution (1.0)")
+            print(
+                f"{' ' * 4}{target['target path']} contains {float(target['distribution']) * total_images} files constituting ({float(target['distribution']) * total_images / total_images}) of the full distribution (1.0)"
+            )
+
 
     def move_images(image_list, target_dir):
         """
@@ -553,8 +581,8 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
             image_list (list): List of FileGrouping objects to be moved
             target_dir: The base target directory the FileGrouping object gets sendt to i.e (the image goes to target_dir/images and the labels go to target_dir/labels)
         """
-        target_images_dir = target_dir / 'images'
-        target_labels_dir = target_dir / 'labels'
+        target_images_dir = target_dir / "images"
+        target_labels_dir = target_dir / "labels"
 
         for file_grouping in image_list:
             # Move image file
@@ -567,6 +595,7 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
             if label_path.exists() and label_path.parent != target_labels_dir:
                 shutil.move(str(label_path), str(target_labels_dir))
 
+
     try:
         configuration = Configuration("config.json")
         redistribute_images(configuration)
@@ -574,9 +603,8 @@ def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
         print(f"Invalid Configuration Data: {e}")
 
 
-
     print()
-    # Finally Examine Resulting Datastructure 
+    # Finally Examine Resulting Datastructure
     for _split in ["train", "valid", "test"]:
         _img_path = DATASET_ROOT / _split / "images"
         _label_path = DATASET_ROOT / _split / "labels"
@@ -590,9 +618,9 @@ def _(YOLO):
         batch,
         lr0=0.01,
         dropout=0.0,
-        mosaic=1.0,
+        mosaic=0.0,
         name="experiment",
-        project="runs/saved_2",
+        project="runs/saved/",
         seed=0,
     ):
         model = YOLO("yolov8n.pt")
@@ -612,6 +640,7 @@ def _(YOLO):
             save=True,
             seed=seed,
             deterministic=True,
+            optimizer="ADAM",
         )
         return results
     return (train_model,)
@@ -665,7 +694,6 @@ def _(mo):
 
 @app.cell
 def _(PrettyTable, TABLES_STYLE, TRAINING_LABELS_PATH, mo):
-
     # Display sample label file
     _label_files = list(TRAINING_LABELS_PATH.glob("*.txt"))
     _first_label = _label_files[0]
@@ -1048,7 +1076,7 @@ def _(
     print("VISUALIZING SAMPLE IMAGES")
     print("=" * 50)
 
-    NUM_SAMPLE_IMAGES = 6 # Minimum == 3
+    NUM_SAMPLE_IMAGES = 6  # Minimum == 3
 
     """
     Displays a set number of images with all classes defined from the training set
@@ -1214,21 +1242,23 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(r"""### Baseline (100 epochs, batch=16, lr=0.01)""")
+    mo.md(r"""### Baseline (100 epochs, batch=16, lr=0.000714) # true rate 714 not default whatever""")
     return
 
 
 @app.cell
 def _(mo):
-    train_baseline = mo.ui.run_button(label="Train Baseline", )
+    train_baseline = mo.ui.run_button(
+        label="Train Baseline",
+    )
     train_baseline
     return (train_baseline,)
 
 
 @app.cell
 def _(mo, train_baseline, train_model):
-    mo.stop(not train_baseline.value)
-    train_model(epochs=100, batch=16, name="ppe_100", seed=42, exist_ok=False)
+    mo.stop(not train_baseline.value) # true rate 714 not default whaterever
+    train_model(epochs=100, batch=16, name="ppe_100", seed=42)
     return
 
 
@@ -1254,35 +1284,13 @@ def _(mo, train_batch8, train_model):
 
 @app.cell
 def _(mo):
-    mo.md(r"""### No Mosaic Augmentation""")
-    return
-
-
-@app.cell
-def _(mo):
-    train_no_mosaic = mo.ui.run_button(label="Train No Mosaic")
-    train_no_mosaic
-    return (train_no_mosaic,)
-
-
-@app.cell
-def _(mo, train_model, train_no_mosaic):
-    mo.stop(not train_no_mosaic.value)
-    train_model(
-        epochs=100, batch=16, mosaic=0.0, name="ppe_100_no_mosaic", seed=44
-    )
-    return
-
-
-@app.cell
-def _(mo):
     mo.md(r"""### Learning Rate 0.001""")
     return
 
 
 @app.cell
 def _(mo):
-    train_lr001 = mo.ui.run_button(label="Train LR=0.001")
+    train_lr001 = mo.ui.run_button(label="Train LR=0.001")  # 00012 folder, true rate 001
     train_lr001
     return (train_lr001,)
 
@@ -1296,27 +1304,27 @@ def _(mo, train_lr001, train_model):
 
 @app.cell
 def _(mo):
-    mo.md(r"""### Learning Rate 0.02""")
+    mo.md(r"""<!-- ### Learning Rate 0.02 -->""")
+    return
+
+
+@app.cell
+def _():
+    # train_lr002 = mo.ui.run_button(label="Train LR=0.02")
+    # train_lr002
+    return
+
+
+@app.cell
+def _():
+    # mo.stop(not train_lr002.value)
+    # train_model(epochs=100, batch=16, lr0=0.02, name="ppe_100_lr_0.02", seed=46)
     return
 
 
 @app.cell
 def _(mo):
-    train_lr002 = mo.ui.run_button(label="Train LR=0.02")
-    train_lr002
-    return (train_lr002,)
-
-
-@app.cell
-def _(mo, train_lr002, train_model):
-    mo.stop(not train_lr002.value)
-    train_model(epochs=100, batch=16, lr0=0.02, name="ppe_100_lr_0.02", seed=46)
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""### Dropout 0.2""")
+    mo.md(r"""### Dropout 0.2 (adma 0.01)""")
     return
 
 
@@ -1370,7 +1378,7 @@ def _(mo):
 
 @app.cell
 def _(Path, mo):
-    runs_dir = Path("runs/saved_2")
+    runs_dir = Path("runs/saved")
     if not runs_dir.exists():
         runs_dir.mkdir(parents=True, exist_ok=True)
     run_names = [
@@ -1401,6 +1409,7 @@ def _(load_run_data, mo, run_names, runs_dir):
         _run_path = runs_dir / _name
         _results, _args = load_run_data(_run_path)
         all_runs[_name] = {"results": _results, "args": _args}
+    print(all_runs)
     return (all_runs,)
 
 
@@ -1599,7 +1608,7 @@ def _(mo):
 
 
 @app.cell
-def _(all_runs, mo, pl):
+def _(PrettyTable, TABLES_STYLE, all_runs, mo, pl):
     comparison_df = pl.DataFrame(
         {
             "Run": [name.replace("ppe_", "") for name in sorted(all_runs.keys())],
@@ -1630,10 +1639,15 @@ def _(all_runs, mo, pl):
         }
     )
 
+
+    _table = PrettyTable()
+    _table.field_names = comparison_df.columns
+    _table.add_rows(comparison_df.rows())
+    _table.set_style(TABLES_STYLE)
+
     mo.md(f"""
     ### Detailed Comparison Table
-
-    {comparison_df}
+    {_table.get_string()}
     """)
     return
 
