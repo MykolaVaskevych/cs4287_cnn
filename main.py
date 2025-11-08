@@ -18,6 +18,7 @@ def _():
     import shutil
     import cv2
     import yaml
+    import hashlib
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
     import numpy as np
@@ -27,7 +28,6 @@ def _():
     from bokeh.plotting import figure, show, output_notebook
     from bokeh.layouts import column
     from PIL import Image
-
     return (
         Image,
         Path,
@@ -36,6 +36,7 @@ def _():
         cv2,
         defaultdict,
         figure,
+        hashlib,
         json,
         mo,
         mpimg,
@@ -354,7 +355,7 @@ def _(mo):
 
 
 @app.cell
-def _(DATASET_ROOT, Path, json, random, shutil):
+def _(DATASET_ROOT, Path, hashlib, json, random, shutil):
     print("=" * 50)
     print("DATASET STRUCTURE")
     print("Re-Structures Dataset to 80:10:10 Train:Test:Validation Split")
@@ -396,6 +397,14 @@ def _(DATASET_ROOT, Path, json, random, shutil):
 
             return reprString
 
+    def get_file_hash(file_path):
+        """Calculate MD5 hash of a file's contents."""
+        hash_md5 = hashlib.md5()
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
+
     def redistribute_images(configuration):
         """
         Redistributes files from a set of source directories to a set of target directories
@@ -421,6 +430,8 @@ def _(DATASET_ROOT, Path, json, random, shutil):
         # Collect all images from all directories
         all_images = []
         currentDistribution = {}
+        seen_image_hashes = {}
+
         for directory in configuration.source:
             directory = directory / 'images'
             count = 0
@@ -432,12 +443,21 @@ def _(DATASET_ROOT, Path, json, random, shutil):
                                  .replace('/images/', '/labels/', 1)
                                  .rsplit('.', 1)[0] + '.txt')
 
+                image_hash = get_file_hash(imagePath)
+                if image_hash in seen_image_hashes:
+                    print(f"Duplicate image found: {imagePath}")
+                    print(f"Original: {seen_image_hashes[image_hash]}")
+                    print()
+                    continue
                 if imagePath.is_file() and labelPath.is_file():
-
+       
                     file_grouping = FileGrouping(imagePath, labelPath)
                     all_images.append(file_grouping)
+                    seen_image_hashes[image_hash] = imagePath
                     count += 1
+
             currentDistribution[directory] = count
+
 
         total_images = len(all_images)
         if total_images == 0:
@@ -709,14 +729,14 @@ def _(
 
     for _idx, _img_file in enumerate(_all_image_files):
         _label_file = SAMPLE_IMAGES / (_img_file.stem + ".txt")
-    
+
         if _label_file.exists():
             _img_with_boxes = draw_boxes_on_image(
                 _img_file, _label_file, CLASS_NAMES, BBOX_COLORS
             )
             if _idx >= len(_axes):
                 break
-        
+
             _axes[_idx].imshow(_img_with_boxes)
             _axes[_idx].set_title(f"Image: {_img_file.name}", fontsize=10)
             _axes[_idx].axis("off")
