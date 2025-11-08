@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.17.0"
+__generated_with = "0.17.2"
 app = marimo.App(width="medium", auto_download=["ipynb"])
 
 
@@ -18,41 +18,125 @@ def _():
 
 @app.cell
 def _():
-    return
-
-
-@app.cell
-def _():
     import random
     import matplotlib.pyplot as plt
     import matplotlib.image as mpimg
     import cv2
     from pathlib import Path
     import numpy as np
-    from ultralytics import YOLO
-    import yaml
+    from ultralytics import YOLO  # type: ignore
     from collections import Counter, defaultdict
-    from bokeh.plotting import figure, show, output_notebook
-    from bokeh.layouts import column
-    from PIL import Image
     import torch
+    from prettytable import PrettyTable
+    from prettytable import TableStyle
+    import polars as pl
+    import yaml
+    import seaborn as sns
     return (
         Counter,
-        Image,
         Path,
+        PrettyTable,
+        TableStyle,
         YOLO,
-        column,
         cv2,
         defaultdict,
-        figure,
         mpimg,
         np,
-        output_notebook,
+        pl,
         plt,
         random,
-        show,
+        sns,
         torch,
+        yaml,
     )
+
+
+@app.cell
+def _(TableStyle):
+    TABLES_STYLE = TableStyle.MARKDOWN  # DEFAULT | MARKDOWN | ASCII
+    return (TABLES_STYLE,)
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""# CHECKS & SETTINGS""")
+    return
+
+
+@app.cell(hide_code=True)
+def _():
+    def ascii_table_to_latex(ascii_table, caption="", label="", precision=3):
+        """
+        tmp for latex stuff, dont forget to change table style to default or ascii
+        """
+        lines = ascii_table.strip().split("\n")
+
+        data_lines = [line for line in lines if not line.startswith("+")]
+
+        if not data_lines:
+            return ""
+        header_line = data_lines[0]
+        data_rows = data_lines[1:]
+
+        header_cells = [cell.strip() for cell in header_line.split("|")[1:-1]]
+        header_cells = [cell.replace("_", "\\_") for cell in header_cells]
+
+        parsed_rows = []
+        for row in data_rows:
+            cells = [cell.strip() for cell in row.split("|")[1:-1]]
+            formatted_cells = []
+            for cell in cells:
+                try:
+                    num = float(cell)
+                    if num.is_integer():
+                        formatted_cells.append(str(int(num)))
+                    else:
+                        formatted_cells.append(f"{num:.{precision}f}")
+                except ValueError:
+                    formatted_cells.append(cell.replace("_", "\\_"))
+            parsed_rows.append(formatted_cells)
+
+        num_cols = len(header_cells)
+        colspec = "{" + "r" * num_cols + "}"
+
+        latex_code = []
+
+        if caption or label:
+            latex_code.append("\\begin{table}[h]")
+            if caption:
+                latex_code.append(f"    \\caption{{{caption}}}")
+            if label:
+                latex_code.append(f"    \\label{{{label}}}")
+            latex_code.append("    \\centering")
+
+        latex_code.append(f"    \\begin{{tabular}}{colspec}")
+        latex_code.append("    \\toprule")
+
+        header_str = " & ".join(header_cells)
+        latex_code.append(f"    {header_str} \\\\")
+        latex_code.append("    \\midrule")
+
+        for row in parsed_rows:
+            row_str = " & ".join(row)
+            latex_code.append(f"    {row_str} \\\\")
+
+        latex_code.append("    \\bottomrule")
+        latex_code.append("    \\end{tabular}")
+
+        if caption or label:
+            latex_code.append("\\end{table}")
+
+        return "\n".join(latex_code)
+
+
+    ascii_table = """
+    """
+
+    latex_output = ascii_table_to_latex(
+        ascii_table, caption="", label="", precision=3
+    )
+    print(latex_output)
+    return
 
 
 @app.cell(hide_code=True)
@@ -66,202 +150,9 @@ def _(mo):
     **Status**: Code executes to completion: YES
 
     ## Overview
-    This notebook fine-tunes a YOLOv8 nano model to detect Personal Protective Equipment (PPE)
-    violations on construction sites. The model identifies safety equipment (hardhats, masks,
-    safety vests) and flags violations when workers lack proper protection.
-
-    ## Dataset
-    - **Classes**: 10 (Hardhat, Mask, NO-Hardhat, NO-Mask, NO-Safety Vest, Person, Safety Cone, Safety Vest, machinery, vehicle)
-    - **Format**: YOLO format with normalized bounding boxes
-    - **Splits**: Train/Validation/Test
-
-    ## Quick Start
-    1. Ensure dataset is in `data/archive/css-data/` directory
-    2. Run all cells sequentially (training will not start automatically)
-    3. Review dataset statistics and quality
-    4. Click "Train Model" button when ready to train
-    5. Scroll down to see training results and model comparison
+    The model identifies safety equipment (hardhats, masks, safety vests) and flags violations when workers lack proper protection.
+    The model uses yolo
     """
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    # CHECKS & SETTINGS
-    ## NOTE: CHECK CONSTANTS BELOW TO ENSURE CORRECTNESS BEFORE RUNNING THE NOTEBOOK.
-
-    **⚡ Quick Navigation**: [Jump to Train Button](#training-configuration)
-    """
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    regenerate_yaml = mo.ui.checkbox(
-        label="# Regenerate YAML file (uncheck to skip if file is correct)",
-        value=False
-    )
-    regenerate_yaml
-    return (regenerate_yaml,)
-
-
-@app.cell
-def _(Path, np, random, torch):
-    # Reproducibility
-    RANDOM_SEED = 42
-    random.seed(RANDOM_SEED)
-    np.random.seed(RANDOM_SEED)
-    torch.manual_seed(RANDOM_SEED)
-
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(RANDOM_SEED)
-
-    # Auto-detect best available device
-    if torch.cuda.is_available():
-        DEVICE = 0
-        _device_name = torch.cuda.get_device_name(0)
-        _vram_gb = torch.cuda.get_device_properties(0).total_memory / 1024**3
-        print(f"GPU detected: {_device_name} ({_vram_gb:.1f}GB VRAM)")
-        print(f"Recommended BATCH_SIZE: {16 if _vram_gb >= 8 else 8}")
-    else:
-        DEVICE = "cpu"
-        print("⚠ No GPU detected - training will be significantly slower")
-        print("Recommended: Reduce EPOCHS to 10 and BATCH_SIZE to 4 for CPU")
-
-    # Dataset paths
-    DATASET_ROOT = Path.cwd() / "data" / "archive" / "css-data"
-    TRAINING_IMAGES_PATH = (DATASET_ROOT / "train" / "images").resolve()
-    TRAINING_LABELS_PATH = (DATASET_ROOT / "train" / "labels").resolve()
-    VALIDATION_IMAGES_PATH = (DATASET_ROOT / "valid" / "images").resolve()
-    VALIDATION_LABELS_PATH = (DATASET_ROOT / "valid" / "labels").resolve()
-    TEST_IMAGES_PATH = (DATASET_ROOT / "test" / "images").resolve()
-    TEST_LABELS_PATH = (DATASET_ROOT / "test" / "labels").resolve()
-    YAML_CONFIG_PATH = DATASET_ROOT / "data.yaml"
-
-    # Model paths
-    PRETRAINED_MODEL_PATH = "yolov8n.pt"
-    TRAINING_OUTPUT_DIR = "runs/train"
-    TRAINING_RUN_NAME = "ppe_detection"
-    TRAINED_MODEL_PATH = (
-        Path(TRAINING_OUTPUT_DIR) / TRAINING_RUN_NAME / "weights" / "best.pt"
-    )
-
-    # Training parameters
-    EPOCHS = 10  # Reduce to 10 for quick testing or CPU training
-    IMAGE_SIZE = 640  # YOLO standard input size
-    BATCH_SIZE = 16  # Reduce to 4-8 for low VRAM or CPU
-
-    # Detection parameters
-    CONFIDENCE_THRESHOLD = 0.25  # Minimum confidence for detections (0.0-1.0)
-
-    # Visualization parameters
-    NUM_SAMPLE_IMAGES = 6
-    NUM_COMPARISON_IMAGES = 4
-    NUM_BASELINE_TEST_SAMPLES = 3
-
-    # Class definitions
-    CLASS_NAMES = {
-        0: "Hardhat",
-        1: "Mask",
-        2: "NO-Hardhat",
-        3: "NO-Mask",
-        4: "NO-Safety Vest",
-        5: "Person",
-        6: "Safety Cone",
-        7: "Safety Vest",
-        8: "machinery",
-        9: "vehicle",
-    }
-
-    # Bounding box colors (BGR format for OpenCV)
-    BBOX_COLORS = {
-        0: (0, 255, 0),      # Hardhat - Green
-        1: (255, 255, 0),    # Mask - Cyan
-        2: (0, 0, 255),      # NO-Hardhat - Red
-        3: (0, 0, 255),      # NO-Mask - Red
-        4: (0, 0, 255),      # NO-Safety Vest - Red
-        5: (255, 0, 255),    # Person - Magenta
-        6: (0, 165, 255),    # Safety Cone - Orange
-        7: (0, 255, 0),      # Safety Vest - Green
-        8: (128, 128, 128),  # machinery - Gray
-        9: (255, 0, 0),      # vehicle - Blue
-    }
-    return (
-        BATCH_SIZE,
-        BBOX_COLORS,
-        CLASS_NAMES,
-        CONFIDENCE_THRESHOLD,
-        DATASET_ROOT,
-        DEVICE,
-        EPOCHS,
-        IMAGE_SIZE,
-        NUM_BASELINE_TEST_SAMPLES,
-        NUM_COMPARISON_IMAGES,
-        NUM_SAMPLE_IMAGES,
-        PRETRAINED_MODEL_PATH,
-        TEST_IMAGES_PATH,
-        TRAINED_MODEL_PATH,
-        TRAINING_IMAGES_PATH,
-        TRAINING_LABELS_PATH,
-        TRAINING_OUTPUT_DIR,
-        TRAINING_RUN_NAME,
-        VALIDATION_IMAGES_PATH,
-        YAML_CONFIG_PATH,
-    )
-
-
-@app.cell
-def _(
-    BATCH_SIZE,
-    CONFIDENCE_THRESHOLD,
-    DATASET_ROOT,
-    DEVICE,
-    EPOCHS,
-    IMAGE_SIZE,
-    TEST_IMAGES_PATH,
-    TRAINING_IMAGES_PATH,
-    VALIDATION_IMAGES_PATH,
-    mo,
-):
-    # Validate dataset structure exists
-    _missing_paths = []
-    _paths_to_check = {
-        "Dataset root": DATASET_ROOT,
-        "Training images": TRAINING_IMAGES_PATH,
-        "Validation images": VALIDATION_IMAGES_PATH,
-        "Test images": TEST_IMAGES_PATH,
-    }
-
-    for _name, _path in _paths_to_check.items():
-        if not _path.exists():
-            _missing_paths.append(f"- {_name}: `{_path}`")
-
-    if _missing_paths:
-        _error_msg = "**ERROR: Missing required paths:**\n\n" + "\n".join(_missing_paths)
-        _error_msg += "\n\n**Please ensure dataset is extracted to the correct location.**"
-        mo.stop(True, mo.md(_error_msg))
-
-    print("✓ All dataset paths validated successfully\n")
-
-    # Display configuration summary
-    mo.md(
-        f"""
-        ## Current Configuration
-
-        | Parameter | Value | Description |
-        |-----------|-------|-------------|
-        | Device | `{DEVICE}` | Training device (0=GPU, 'cpu'=CPU) |
-        | Epochs | `{EPOCHS}` | Training iterations through dataset |
-        | Image Size | `{IMAGE_SIZE}px` | Input resolution |
-        | Batch Size | `{BATCH_SIZE}` | Images per training step |
-        | Confidence | `{CONFIDENCE_THRESHOLD}` | Min score for detections |
-
-        **Note**: Adjust BATCH_SIZE in constants cell if you get OOM (Out of Memory) errors.
-        """
     )
     return
 
@@ -279,44 +170,6 @@ def _(mo):
 
 
 @app.cell
-def _(
-    CLASS_NAMES,
-    DATASET_ROOT,
-    TEST_IMAGES_PATH,
-    TRAINING_IMAGES_PATH,
-    VALIDATION_IMAGES_PATH,
-    YAML_CONFIG_PATH,
-    regenerate_yaml,
-):
-    # Generate YAML using CLASS_NAMES constant to ensure consistency
-    _names_yaml = "\n  ".join([f"{k}: {v}" for k, v in CLASS_NAMES.items()])
-
-    _yaml_content = f"""path: {DATASET_ROOT.resolve()}
-    train: train/images
-    val: valid/images
-    test: test/images
-
-    nc: {len(CLASS_NAMES)}
-    names:
-      {_names_yaml}
-    """
-
-    if regenerate_yaml.value:
-        with open(YAML_CONFIG_PATH, "w") as _f:
-            _f.write(_yaml_content)
-        print("✓ Generated data.yaml:")
-        print(_yaml_content)
-    else:
-        print("✓ Skipped YAML generation (using existing file)")
-
-    print("\nVerifying paths:")
-    print(f"Train exists: {TRAINING_IMAGES_PATH.exists()}")
-    print(f"Val exists: {VALIDATION_IMAGES_PATH.exists()}")
-    print(f"Test exists: {TEST_IMAGES_PATH.exists()}")
-    return
-
-
-@app.cell
 def _(mo):
     mo.md(
         r"""
@@ -329,19 +182,115 @@ def _(mo):
 
 
 @app.cell
-def _(DATASET_ROOT):
-    print("=" * 50)
-    print("DATASET STRUCTURE")
-    print("=" * 50)
+def _(np, random, torch):
+    RANDOM_SEED = 42
+    random.seed(RANDOM_SEED)
+    np.random.seed(RANDOM_SEED)
+    torch.manual_seed(RANDOM_SEED)
+    return (RANDOM_SEED,)
 
-    for _split in ["train", "valid", "test"]:
-        _img_path = DATASET_ROOT / _split / "images"
-        _label_path = DATASET_ROOT / _split / "labels"
 
-        _num_images = len(list(_img_path.glob("*.jpg")))
-        _num_labels = len(list(_label_path.glob("*.txt")))
+@app.cell
+def _(RANDOM_SEED, torch):
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(RANDOM_SEED)
 
-        print(f"{_split.upper():10s}: {_num_images} images, {_num_labels} labels")
+
+    if torch.cuda.is_available():
+        DEVICE = 0
+        _device_name = torch.cuda.get_device_name(0)
+        _vram_gb = torch.cuda.get_device_properties(0).total_memory / 1024**3
+    else:
+        DEVICE = "cpu"
+    return
+
+
+@app.cell
+def _(Path):
+    DATASET_ROOT = Path.cwd() / "data" / "archive" / "css-data"
+    TRAINING_IMAGES_PATH = (DATASET_ROOT / "train" / "images").resolve()
+    TRAINING_LABELS_PATH = (DATASET_ROOT / "train" / "labels").resolve()
+    TEST_IMAGES_PATH = (DATASET_ROOT / "test" / "images").resolve()
+    PRETRAINED_MODEL_PATH = "yolov8n.pt"
+    return (
+        DATASET_ROOT,
+        PRETRAINED_MODEL_PATH,
+        TEST_IMAGES_PATH,
+        TRAINING_IMAGES_PATH,
+        TRAINING_LABELS_PATH,
+    )
+
+
+@app.cell
+def _():
+    CONFIDENCE_THRESHOLD = 0.25
+    NUM_SAMPLE_IMAGES = 6
+    NUM_BASELINE_TEST_SAMPLES = 3
+    return CONFIDENCE_THRESHOLD, NUM_BASELINE_TEST_SAMPLES, NUM_SAMPLE_IMAGES
+
+
+@app.cell
+def _(YOLO):
+    def train_model(
+        epochs,
+        batch,
+        lr0=0.01,
+        dropout=0.0,
+        mosaic=1.0,
+        name="experiment",
+        project="runs/saved_2",
+        seed=0,
+    ):
+        model = YOLO("yolov8n.pt")
+        results = model.train(
+            data="data/archive/css-data/data.yaml",
+            epochs=epochs,
+            imgsz=640,
+            batch=batch,
+            device=0,
+            project=project,
+            name=name,
+            exist_ok=False,
+            lr0=lr0,
+            dropout=dropout,
+            mosaic=mosaic,
+            patience=100,
+            save=True,
+            seed=seed,
+            deterministic=True,
+        )
+        return results
+    return (train_model,)
+
+
+@app.cell
+def _(DATASET_ROOT, PrettyTable, TABLES_STYLE, mo):
+    # Display dataset structure summary
+    _table = PrettyTable()
+    _table.field_names = ["Split", "Images", "Labels"]
+    _table.add_rows(
+        [
+            [
+                "TRAIN",
+                len(list((DATASET_ROOT / "train" / "images").glob("*.jpg"))),
+                len(list((DATASET_ROOT / "train" / "labels").glob("*.txt"))),
+            ],
+            [
+                "VALID",
+                len(list((DATASET_ROOT / "valid" / "images").glob("*.jpg"))),
+                len(list((DATASET_ROOT / "valid" / "labels").glob("*.txt"))),
+            ],
+            [
+                "TEST",
+                len(list((DATASET_ROOT / "test" / "images").glob("*.jpg"))),
+                len(list((DATASET_ROOT / "test" / "labels").glob("*.txt"))),
+            ],
+        ]
+    )
+    _table.set_style(TABLES_STYLE)
+    mo.md(_table.get_string())
+    print(len(list((DATASET_ROOT / "test" / "images").glob("*.jpg")))+len(list((DATASET_ROOT / "valid" / "images").glob("*.jpg")))+len(list((DATASET_ROOT / "train" / "images").glob("*.jpg"))))
+
     return
 
 
@@ -358,24 +307,37 @@ def _(mo):
 
 
 @app.cell
-def _(TRAINING_LABELS_PATH):
-    print("=" * 50)
-    print("SAMPLE LABEL FILE")
-    print("=" * 50)
-
+def _(PrettyTable, TABLES_STYLE, TRAINING_LABELS_PATH, mo):
+    # Display sample label file
     _label_files = list(TRAINING_LABELS_PATH.glob("*.txt"))
     _first_label = _label_files[0]
 
-    print(f"\nLabel file: {_first_label.name}")
-    print("\nContents (first 10 lines):")
     with open(_first_label, "r") as _f:
         _lines = _f.readlines()[:10]
-        for _i, _line in enumerate(_lines, 1):
-            print(f"  {_i}. {_line.strip()}")
 
-    print(f"\nTotal objects in this image: {len(_lines)}")
-    print("\nFormat: class_id x_center y_center width height")
-    print("(All values normalized between 0 and 1)")
+    _table = PrettyTable()
+    _table.field_names = [
+        "Line",
+        "class_id",
+        "x_center",
+        "y_center",
+        "width",
+        "height",
+    ]
+    _table.add_rows(
+        [[_i] + _line.strip().split() for _i, _line in enumerate(_lines, 1)]
+    )
+    _table.set_style(TABLES_STYLE)
+
+    mo.md(f"""
+    ## SAMPLE LABEL FILE
+
+    **Label file:** `{_first_label.name}`
+
+    {_table.get_string()}
+
+    **Total objects in this image:** {len(_lines)}
+    """)
     return
 
 
@@ -392,16 +354,10 @@ def _(mo):
 
 
 @app.cell
-def _(Counter, DATASET_ROOT):
-    print("=" * 50)
-    print("CLASS DISTRIBUTION")
-    print("=" * 50)
-
+def _(Counter, DATASET_ROOT, PrettyTable, TableStyle, mo):
     _all_class_ids = []
-
     for _split in ["train", "valid", "test"]:
         _label_path = DATASET_ROOT / _split / "labels"
-
         for _label_file in _label_path.glob("*.txt"):
             with open(_label_file, "r") as _f:
                 for _line in _f:
@@ -412,13 +368,241 @@ def _(Counter, DATASET_ROOT):
 
     _class_counts = Counter(_all_class_ids)
 
-    print(f"\nTotal objects across all images: {len(_all_class_ids)}")
-    print(f"Number of unique classes: {len(_class_counts)}")
-    print("\nClass distribution:")
-    for _class_id in sorted(_class_counts.keys()):
-        _count = _class_counts[_class_id]
-        _percentage = (_count / len(_all_class_ids)) * 100
-        print(f"  Class {_class_id}: {_count:5d} objects ({_percentage:5.2f}%)")
+    _table = PrettyTable()
+    _table.field_names = ["Class ID", "Count", "Percentage"]
+    _table.add_rows(
+        [
+            [
+                _class_id,
+                _class_counts[_class_id],
+                f"{(_class_counts[_class_id] / len(_all_class_ids)) * 100:.2f}%",
+            ]
+            for _class_id in sorted(_class_counts.keys())
+        ]
+    )
+    _table.set_style(TableStyle.MARKDOWN)
+
+    mo.md(f"""
+    ## CLASS DISTRIBUTION
+
+    **Total objects:** {len(_all_class_ids)}  
+    **Number of unique classes:** {len(_class_counts)}
+
+    {_table.get_string()}
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ## Data Validation & Cleaning
+
+    Validate dataset integrity and remove corrupted/invalid data before training.
+    """
+    )
+    return
+
+
+@app.cell
+def _(cv2):
+    def validate_image(img_path):
+        """Check if image can be loaded and is not corrupted"""
+        try:
+            _img = cv2.imread(str(img_path))
+            if _img is None:
+                return False, "Failed to load"
+            if _img.size == 0:
+                return False, "Empty image"
+            return True, None
+        except Exception as _e:
+            return False, str(_e)
+
+
+    def validate_label(label_path, num_classes=10):
+        """Validate label file content"""
+        _issues = []
+        try:
+            with open(label_path, "r") as _f:
+                _lines = _f.readlines()
+
+            if not _lines:
+                return True, None  # Empty labels are valid (no objects)
+
+            for _i, _line in enumerate(_lines, 1):
+                _parts = _line.strip().split()
+                if len(_parts) != 5:
+                    _issues.append(
+                        f"Line {_i}: Invalid format (expected 5 values)"
+                    )
+                    continue
+
+                try:
+                    _cls, _x, _y, _w, _h = map(float, _parts)
+
+                    if not (0 <= _cls < num_classes):
+                        _issues.append(f"Line {_i}: Invalid class {int(_cls)}")
+                    if not (0 <= _x <= 1 and 0 <= _y <= 1):
+                        _issues.append(f"Line {_i}: Center coords out of range")
+                    if not (0 < _w <= 1 and 0 < _h <= 1):
+                        _issues.append(f"Line {_i}: Invalid dimensions")
+                except ValueError:
+                    _issues.append(f"Line {_i}: Non-numeric values")
+
+            return len(_issues) == 0, _issues if _issues else None
+        except Exception as _e:
+            return False, [str(_e)]
+    return validate_image, validate_label
+
+
+@app.cell
+def _(DATASET_ROOT, validate_image, validate_label):
+    def scan_dataset(dataset_root):
+        """Scan all splits and collect validation issues"""
+        _issues = {
+            "corrupted_images": [],
+            "missing_labels": [],
+            "missing_images": [],
+            "invalid_labels": [],
+        }
+
+        for _split in ["train", "valid", "test"]:
+            _img_dir = dataset_root / _split / "images"
+            _lbl_dir = dataset_root / _split / "labels"
+
+            if not _img_dir.exists() or not _lbl_dir.exists():
+                continue
+
+            # Check images
+            for _img_path in _img_dir.glob("*.jpg"):
+                _lbl_path = _lbl_dir / f"{_img_path.stem}.txt"
+
+                # Validate image
+                _valid, _error = validate_image(_img_path)
+                if not _valid:
+                    _issues["corrupted_images"].append(
+                        (_split, _img_path.name, _error)
+                    )
+
+                # Check label exists
+                if not _lbl_path.exists():
+                    _issues["missing_labels"].append((_split, _img_path.name))
+
+            # Check for orphaned labels
+            for _lbl_path in _lbl_dir.glob("*.txt"):
+                _img_path = _img_dir / f"{_lbl_path.stem}.jpg"
+                if not _img_path.exists():
+                    _issues["missing_images"].append((_split, _lbl_path.name))
+                else:
+                    # Validate label content
+                    _valid, _errors = validate_label(_lbl_path)
+                    if not _valid:
+                        _issues["invalid_labels"].append(
+                            (_split, _lbl_path.name, _errors)
+                        )
+
+        return _issues
+
+
+    validation_issues = scan_dataset(DATASET_ROOT)
+    return (validation_issues,)
+
+
+@app.cell
+def _(PrettyTable, TABLES_STYLE, mo, validation_issues):
+    _table = PrettyTable()
+    _table.field_names = ["Issue Type", "Count"]
+    _table.add_rows(
+        [
+            ["Corrupted Images", len(validation_issues["corrupted_images"])],
+            ["Missing Labels", len(validation_issues["missing_labels"])],
+            ["Orphaned Labels", len(validation_issues["missing_images"])],
+            ["Invalid Labels", len(validation_issues["invalid_labels"])],
+        ]
+    )
+    _table.set_style(TABLES_STYLE)
+
+    _total = sum(len(_v) for _v in validation_issues.values())
+
+    mo.md(f"""
+    ## Validation Results
+
+    {_table.get_string()}
+
+    **Total Issues Found:** {_total}
+    """)
+    return
+
+
+@app.cell
+def _(mo, validation_issues):
+    _has_issues = any(len(_v) > 0 for _v in validation_issues.values())
+
+    if _has_issues:
+        clean_btn = mo.ui.run_button(label="Clean Dataset")
+        clean_btn
+    else:
+        clean_btn = None
+        mo.md("**Dataset is clean - no issues found**")
+    return (clean_btn,)
+
+
+@app.cell
+def _(DATASET_ROOT, Path, clean_btn, mo, validation_issues):
+    mo.stop(
+        clean_btn is None or not clean_btn.value,
+        mo.md("Click button to clean dataset"),
+    )
+
+    _cleaned = {"images": 0, "labels": 0}
+
+    # Remove corrupted images and their labels
+    for _split, _img_name, _error in validation_issues["corrupted_images"]:
+        _img_path = DATASET_ROOT / _split / "images" / _img_name
+        _lbl_path = (
+            DATASET_ROOT / _split / "labels" / f"{Path(_img_name).stem}.txt"
+        )
+
+        if _img_path.exists():
+            _img_path.unlink()
+            _cleaned["images"] += 1
+        if _lbl_path.exists():
+            _lbl_path.unlink()
+            _cleaned["labels"] += 1
+
+    # Remove images without labels
+    for _split, _img_name in validation_issues["missing_labels"]:
+        _img_path = DATASET_ROOT / _split / "images" / _img_name
+        if _img_path.exists():
+            _img_path.unlink()
+            _cleaned["images"] += 1
+
+    # Remove orphaned labels
+    for _split, _lbl_name in validation_issues["missing_images"]:
+        _lbl_path = DATASET_ROOT / _split / "labels" / _lbl_name
+        if _lbl_path.exists():
+            _lbl_path.unlink()
+            _cleaned["labels"] += 1
+
+    # Remove invalid labels (and corresponding images)
+    for _split, _lbl_name, _errors in validation_issues["invalid_labels"]:
+        _lbl_path = DATASET_ROOT / _split / "labels" / _lbl_name
+        _img_path = (
+            DATASET_ROOT / _split / "images" / f"{Path(_lbl_name).stem}.jpg"
+        )
+
+        if _lbl_path.exists():
+            _lbl_path.unlink()
+            _cleaned["labels"] += 1
+        if _img_path.exists():
+            _img_path.unlink()
+            _cleaned["images"] += 1
+
+    mo.md(f"""ok
+    **Removed:** {_cleaned["images"]} images, {_cleaned["labels"]} labels
+
+    """)
     return
 
 
@@ -430,13 +614,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-    ## Sample Images Visualization
-
-    Display training images with ground truth bounding boxes overlaid.
-    """
-    )
+    mo.md(r"""## Sample Images Visualization""")
     return
 
 
@@ -499,14 +677,40 @@ def _(cv2):
 
 @app.cell
 def _(
-    BBOX_COLORS,
-    CLASS_NAMES,
     NUM_SAMPLE_IMAGES,
     TRAINING_IMAGES_PATH,
     TRAINING_LABELS_PATH,
     draw_boxes_on_image,
     plt,
 ):
+    # Bounding box colors (BGR format for OpenCV)
+    BBOX_COLORS = {
+        0: (0, 255, 0),  # Hardhat    - Green
+        1: (255, 255, 0),  # Mask       - Cyan
+        2: (0, 0, 255),  # NO-Hardhat - Red
+        3: (0, 0, 255),  # NO-Mask    - Red
+        4: (0, 0, 255),  # NO-Safety Vest - Red
+        5: (255, 0, 255),  # Person          - Magenta
+        6: (0, 165, 255),  # Safety Cone     - Orange
+        7: (0, 255, 0),  # Safety Vest     - Green
+        8: (128, 128, 128),  # machinery       - Gray
+        9: (255, 0, 0),  # vehicle         - Blue
+    }
+
+    # Class definitions
+    CLASS_NAMES = {
+        0: "Hardhat",
+        1: "Mask",
+        2: "NO-Hardhat",
+        3: "NO-Mask",
+        4: "NO-Safety Vest",
+        5: "Person",
+        6: "Safety Cone",
+        7: "Safety Vest",
+        8: "machinery",
+        9: "vehicle",
+    }
+
 
     print("=" * 50)
     print("VISUALIZING SAMPLE IMAGES")
@@ -595,7 +799,7 @@ def _(mo):
 
 @app.cell
 def _(PRETRAINED_MODEL_PATH, YOLO):
-    # Load YOLOv8 nano model pre-trained on COCO dataset (80 classes)
+    # Load YOLOv8 nano model pre-trained on COCO dataset
     pretrained_model = YOLO(PRETRAINED_MODEL_PATH)
     pretrained_model.info()
     return (pretrained_model,)
@@ -620,8 +824,9 @@ def _(
     TEST_IMAGES_PATH,
     pretrained_model,
 ):
-    # CRITICAL: Use TEST set for unbiased baseline evaluation
-    pretrained_test_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[:NUM_BASELINE_TEST_SAMPLES]
+    pretrained_test_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[
+        :NUM_BASELINE_TEST_SAMPLES
+    ]
 
     print("Testing pre-trained COCO model on TEST set (unbiased baseline):")
     for _img_file in pretrained_test_images:
@@ -648,7 +853,10 @@ def _(
 
     for _idx, _img_file in enumerate(pretrained_test_images):
         _results = pretrained_model.predict(
-            source=str(_img_file), conf=CONFIDENCE_THRESHOLD, save=False, verbose=False
+            source=str(_img_file),
+            conf=CONFIDENCE_THRESHOLD,
+            save=False,
+            verbose=False,
         )
 
         _result = _results[0]
@@ -668,18 +876,9 @@ def _(
 def _(mo):
     mo.md(
         r"""
-    <span id="training-configuration"></span>
+    ## Training Experiments
 
-    ## Training Configuration
-
-    Training progress will be displayed below. Key metrics to monitor:
-    - **mAP50**: Mean Average Precision at IoU=0.5 (higher is better, target >0.7)
-    - **Loss**: Should decrease steadily over epochs
-    - **Precision/Recall**: Balance between false positives and false negatives
-
-    **Estimated time**: 30-60 minutes on GPU, 4-8 hours on CPU (50 epochs)
-
-    Click the button below when ready to start training.
+    Run various experiments with different hyperparameters. Each experiment saves to runs/saved_2.
     """
     )
     return
@@ -687,41 +886,145 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    train_button = mo.ui.run_button(label="Train Model")
-    train_button
-    return (train_button,)
+    mo.md(r"""### Baseline (100 epochs, batch=16, lr=0.01)""")
+    return
 
 
 @app.cell
-def _(
-    BATCH_SIZE,
-    DEVICE,
-    EPOCHS,
-    IMAGE_SIZE,
-    TRAINING_OUTPUT_DIR,
-    TRAINING_RUN_NAME,
-    YAML_CONFIG_PATH,
-    mo,
-    pretrained_model,
-    train_button,
-):
-    mo.stop(not train_button.value, mo.md("Press 'Train Model' button to start training"))
+def _(mo):
+    train_baseline = mo.ui.run_button(label="Train Baseline", )
+    train_baseline
+    return (train_baseline,)
 
-    print(f"Training with parameters:")
-    print(f"  Epochs: {EPOCHS}")
-    print(f"  Image Size: {IMAGE_SIZE}")
-    print(f"  Batch Size: {BATCH_SIZE}")
-    print(f"  Device: {DEVICE}")
 
-    training_results = pretrained_model.train(
-        data=str(YAML_CONFIG_PATH),
-        epochs=EPOCHS,
-        imgsz=IMAGE_SIZE,
-        batch=BATCH_SIZE,
-        device=DEVICE,
-        project=TRAINING_OUTPUT_DIR,
-        name=TRAINING_RUN_NAME,
+@app.cell
+def _(mo, train_baseline, train_model):
+    mo.stop(not train_baseline.value)
+    train_model(epochs=100, batch=16, name="ppe_100", seed=42, exist_ok=False)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Batch Size 8""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_batch8 = mo.ui.run_button(label="Train Batch=8")
+    train_batch8
+    return (train_batch8,)
+
+
+@app.cell
+def _(mo, train_batch8, train_model):
+    mo.stop(not train_batch8.value)
+    train_model(epochs=100, batch=8, name="ppe_100_batch_8", seed=43)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### No Mosaic Augmentation""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_no_mosaic = mo.ui.run_button(label="Train No Mosaic")
+    train_no_mosaic
+    return (train_no_mosaic,)
+
+
+@app.cell
+def _(mo, train_model, train_no_mosaic):
+    mo.stop(not train_no_mosaic.value)
+    train_model(
+        epochs=100, batch=16, mosaic=0.0, name="ppe_100_no_mosaic", seed=44
     )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Learning Rate 0.001""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_lr001 = mo.ui.run_button(label="Train LR=0.001")
+    train_lr001
+    return (train_lr001,)
+
+
+@app.cell
+def _(mo, train_lr001, train_model):
+    mo.stop(not train_lr001.value)
+    train_model(epochs=100, batch=16, lr0=0.001, name="ppe_100_lr_0.001", seed=45)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Learning Rate 0.02""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_lr002 = mo.ui.run_button(label="Train LR=0.02")
+    train_lr002
+    return (train_lr002,)
+
+
+@app.cell
+def _(mo, train_lr002, train_model):
+    mo.stop(not train_lr002.value)
+    train_model(epochs=100, batch=16, lr0=0.02, name="ppe_100_lr_0.02", seed=46)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Dropout 0.2""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_dropout = mo.ui.run_button(label="Train Dropout=0.2")
+    train_dropout
+    return (train_dropout,)
+
+
+@app.cell
+def _(mo, train_dropout, train_model):
+    mo.stop(not train_dropout.value)
+    train_model(
+        epochs=100, batch=16, dropout=0.2, name="ppe_100_dropout_0.2", seed=47
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""### Combined Best (batch=8, no mosaic, 750 epochs)""")
+    return
+
+
+@app.cell
+def _(mo):
+    train_combined = mo.ui.run_button(label="Train Combined Best")
+    train_combined
+    return (train_combined,)
+
+
+@app.cell
+def _(mo, train_combined, train_model):
+    mo.stop(not train_combined.value)
+    train_model(epochs=750, batch=8, mosaic=0.0, name="ppe_750_combined", seed=48)
     return
 
 
@@ -729,270 +1032,214 @@ def _(
 def _(mo):
     mo.md(
         r"""
-    ## Training Results Analysis
+    ## Experiment Analysis
 
-    Load trained model and visualize training metrics, confusion matrix, and validation predictions.
+    comparison of all training runs in configurations.
     """
     )
     return
 
 
 @app.cell
-def _(TRAINED_MODEL_PATH, YOLO, mo):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md(f"**Trained model not found at `{TRAINED_MODEL_PATH}`. Please train the model first.**"),
-    )
-
-    trained_model = YOLO(TRAINED_MODEL_PATH)
-    print(f"Loaded trained model from: {TRAINED_MODEL_PATH}")
-    return (trained_model,)
+def _(Path, mo):
+    runs_dir = Path("runs/saved_2")
+    if not runs_dir.exists():
+        runs_dir.mkdir(parents=True, exist_ok=True)
+    run_names = [
+        d.name
+        for d in runs_dir.iterdir()
+        if d.is_dir() and d.name.startswith("ppe_")
+    ]
+    if not run_names:
+        mo.md("**No training runs found yet. Run experiments above first.**")
+    return run_names, runs_dir
 
 
 @app.cell
-def _(TRAINED_MODEL_PATH, mo, mpimg, plt):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md("**Train the model first to see results.**"),
-    )
+def _(pl, yaml):
+    def load_run_data(run_dir):
+        results = pl.read_csv(run_dir / "results.csv")
+        with open(run_dir / "args.yaml") as f:
+            args = yaml.safe_load(f)
+        return results, args
+    return (load_run_data,)
 
-    _results_dir = TRAINED_MODEL_PATH.parent.parent
 
-    _fig, _axes = plt.subplots(2, 2, figsize=(15, 12))
+@app.cell
+def _(load_run_data, mo, run_names, runs_dir):
+    mo.stop(len(run_names) == 0)
+    all_runs = {}
+    for _name in sorted(run_names):
+        _run_path = runs_dir / _name
+        _results, _args = load_run_data(_run_path)
+        all_runs[_name] = {"results": _results, "args": _args}
+    return (all_runs,)
 
-    _images_to_show = [
-        ("results.png", "Training Metrics"),
-        ("confusion_matrix_normalized.png", "Confusion Matrix"),
-        ("val_batch0_labels.jpg", "Validation: Ground Truth"),
-        ("val_batch0_pred.jpg", "Validation: Predictions"),
+
+@app.cell
+def _(PrettyTable, TABLES_STYLE, all_runs, mo):
+    params_table = PrettyTable()
+    params_table.field_names = [
+        "Run",
+        "Epochs",
+        "Batch",
+        "LR",
+        "Dropout",
+        "Mosaic",
     ]
 
-    for _idx, (_img_name, _title) in enumerate(_images_to_show):
-        _img_path = _results_dir / _img_name
-        if _img_path.exists():
-            _img = mpimg.imread(str(_img_path))
-            _axes[_idx // 2, _idx % 2].imshow(_img)
-            _axes[_idx // 2, _idx % 2].set_title(_title)
-            _axes[_idx // 2, _idx % 2].axis("off")
+    for _name, _data in sorted(all_runs.items()):
+        _args = _data["args"]
+        params_table.add_row(
+            [
+                _name.replace("ppe_", ""),
+                _args["epochs"],
+                _args["batch"],
+                _args["lr0"],
+                _args["dropout"],
+                _args["mosaic"],
+            ]
+        )
 
-    plt.tight_layout()
-    plt.gca()
+    params_table.set_style(TABLES_STYLE)
+    mo.md(f"""
+    ### Training Parameters
+
+    {params_table.get_string()}
+    """)
     return
 
 
 @app.cell
-def _(mo):
-    mo.md(
-        r"""
-    ## Detailed Training Metrics
+def _(PrettyTable, TABLES_STYLE, all_runs, mo):
+    results_table = PrettyTable()
+    results_table.field_names = [
+        "Run",
+        "Precision",
+        "Recall",
+        "mAP50",
+        "mAP50-95",
+        "Val Loss",
+    ]
 
-    Large-format visualizations for detailed analysis of training performance.
-    """
-    )
+    for _name, _data in sorted(all_runs.items()):
+        _final = _data["results"].tail(1)
+        results_table.add_row(
+            [
+                _name.replace("ppe_", ""),
+                f"{_final['metrics/precision(B)'][0]:.4f}",
+                f"{_final['metrics/recall(B)'][0]:.4f}",
+                f"{_final['metrics/mAP50(B)'][0]:.4f}",
+                f"{_final['metrics/mAP50-95(B)'][0]:.4f}",
+                f"{_final['val/box_loss'][0]:.4f}",
+            ]
+        )
+
+    results_table.set_style(TABLES_STYLE)
+    mo.md(f"""
+    ### Final Results
+
+    {results_table.get_string()}
+    """)
     return
 
 
 @app.cell
-def _(TRAINED_MODEL_PATH, mo, mpimg, plt):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md("**Train the model first to see detailed results.**"),
-    )
+def _(all_runs, plt, sns):
+    sns.set_style("whitegrid")
 
-    _results_dir = TRAINED_MODEL_PATH.parent.parent
+    _fig, _axes = plt.subplots(2, 2, figsize=(15, 10))
 
-    # Training Metrics
-    _fig1 = plt.figure(figsize=(20, 12))
-    _img1 = mpimg.imread(str(_results_dir / "results.png"))
-    plt.imshow(_img1)
-    plt.title("Training Metrics (Loss, Precision, Recall, mAP)", fontsize=16)
-    plt.axis("off")
-    plt.tight_layout()
-    plt.show()
+    _metrics = [
+        ("metrics/precision(B)", "Precision", _axes[0, 0]),
+        ("metrics/recall(B)", "Recall", _axes[0, 1]),
+        ("metrics/mAP50(B)", "mAP50", _axes[1, 0]),
+        ("metrics/mAP50-95(B)", "mAP50-95", _axes[1, 1]),
+    ]
 
-    # Confusion Matrix
-    _fig2 = plt.figure(figsize=(16, 16))
-    _img2 = mpimg.imread(str(_results_dir / "confusion_matrix_normalized.png"))
-    plt.imshow(_img2)
-    plt.title("Confusion Matrix (Normalized)", fontsize=16)
-    plt.axis("off")
-    plt.tight_layout()
-    plt.show()
-
-    # Validation Comparison
-    _fig3, _axes3 = plt.subplots(1, 2, figsize=(24, 12))
-    _img_labels = mpimg.imread(str(_results_dir / "val_batch0_labels.jpg"))
-    _img_preds = mpimg.imread(str(_results_dir / "val_batch0_pred.jpg"))
-
-    _axes3[0].imshow(_img_labels)
-    _axes3[0].set_title("Validation: Ground Truth Labels", fontsize=14)
-    _axes3[0].axis("off")
-
-    _axes3[1].imshow(_img_preds)
-    _axes3[1].set_title("Validation: Model Predictions", fontsize=14)
-    _axes3[1].axis("off")
-
-    plt.tight_layout()
-    plt.gca()
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    ## Interactive Training Results
-
-    Zoomable Bokeh visualizations of training results with pan and zoom capabilities.
-    """
-    )
-    return
-
-
-@app.cell
-def _(
-    Image,
-    TRAINED_MODEL_PATH,
-    column,
-    figure,
-    mo,
-    np,
-    output_notebook,
-    show,
-):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md("**Train the model first to see interactive results.**"),
-    )
-
-    output_notebook()
-
-    _results_dir = TRAINED_MODEL_PATH.parent.parent
-
-    def _show_image_bokeh(img_path, title, width=1200, height=800):
-        """Display image with Bokeh for interactive exploration"""
-        _img = np.array(Image.open(img_path))
-
-        # Convert to RGBA
-        if _img.ndim == 2:
-            _img_rgba = np.stack(
-                [_img, _img, _img, np.full(_img.shape, 255, dtype=np.uint8)],
-                axis=2,
+    for _metric_name, _label, _ax in _metrics:
+        for _name, _data in sorted(all_runs.items()):
+            _results = _data["results"]
+            _ax.plot(
+                _results["epoch"],
+                _results[_metric_name],
+                label=_name.replace("ppe_", ""),
+                linewidth=2,
             )
-        elif _img.shape[2] == 3:
-            _img_rgba = np.dstack([_img, np.full(_img.shape[:2], 255, dtype=np.uint8)])
-        else:
-            _img_rgba = _img
 
-        _img_rgba = np.flipud(_img_rgba)
-        _img_uint32 = _img_rgba.view(dtype=np.uint32).reshape(_img_rgba.shape[:2])
+        _ax.set_xlabel("Epoch")
+        _ax.set_ylabel(_label)
+        _ax.set_title(f"{_label} Over Training")
+        _ax.legend(loc="best", fontsize=8)
+        _ax.grid(True, alpha=0.3)
 
-        _h, _w = _img_uint32.shape
-
-        _p = figure(
-            width=width,
-            height=height,
-            title=title,
-            x_range=(0, _w),
-            y_range=(0, _h),
-            tools="pan,wheel_zoom,box_zoom,reset,save",
-        )
-
-        _p.image_rgba(image=[_img_uint32], x=0, y=0, dw=_w, dh=_h)
-        _p.axis.visible = False
-
-        return _p
-
-    _p1 = _show_image_bokeh(_results_dir / "results.png", "Training Metrics", 1400, 900)
-    _p2 = _show_image_bokeh(
-        _results_dir / "confusion_matrix_normalized.png", "Confusion Matrix", 1000, 1000
-    )
-    _p3 = _show_image_bokeh(_results_dir / "val_batch0_labels.jpg", "Ground Truth", 1200, 800)
-    _p4 = _show_image_bokeh(_results_dir / "val_batch0_pred.jpg", "Predictions", 1200, 800)
-
-    show(column(_p1, _p2, _p3, _p4))
+    plt.tight_layout()
+    plt.gca()
     return
 
 
 @app.cell
-def _(mo):
-    mo.md(
-        r"""
-    ## Model Comparison: Pre-trained vs Fine-tuned
+def _(all_runs, plt):
+    _fig, _axes = plt.subplots(1, 2, figsize=(15, 5))
 
-    Side-by-side comparison of COCO pre-trained model vs PPE fine-tuned model on test images.
-    """
-    )
+    for _name, _data in sorted(all_runs.items()):
+        _results = _data["results"]
+        _axes[0].plot(
+            _results["epoch"],
+            _results["train/box_loss"],
+            label=_name.replace("ppe_", ""),
+            linewidth=2,
+        )
+        _axes[1].plot(
+            _results["epoch"],
+            _results["val/box_loss"],
+            label=_name.replace("ppe_", ""),
+            linewidth=2,
+        )
+
+    _axes[0].set_xlabel("Epoch")
+    _axes[0].set_ylabel("Loss")
+    _axes[0].set_title("Training Box Loss")
+    _axes[0].legend(loc="best", fontsize=8)
+    _axes[0].grid(True, alpha=0.3)
+
+    _axes[1].set_xlabel("Epoch")
+    _axes[1].set_ylabel("Loss")
+    _axes[1].set_title("Validation Box Loss")
+    _axes[1].legend(loc="best", fontsize=8)
+    _axes[1].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.gca()
     return
 
 
 @app.cell
-def _(
-    CONFIDENCE_THRESHOLD,
-    NUM_COMPARISON_IMAGES,
-    TEST_IMAGES_PATH,
-    TRAINED_MODEL_PATH,
-    cv2,
-    mo,
-    plt,
-    pretrained_model,
-    trained_model,
-):
-    mo.stop(
-        not TRAINED_MODEL_PATH.exists(),
-        mo.md("**Train the model first to see comparison.**"),
-    )
+def _(all_runs, np, plt):
+    _fig, _ax = plt.subplots(figsize=(10, 6))
 
-    _comparison_images = list(TEST_IMAGES_PATH.glob("*.jpg"))[:NUM_COMPARISON_IMAGES]
+    _run_labels = []
+    _map50_values = []
+    _map50_95_values = []
 
-    _fig, _axes = plt.subplots(2, 4, figsize=(20, 10))
+    for _name, _data in sorted(all_runs.items()):
+        _final = _data["results"].tail(1)
+        _run_labels.append(_name.replace("ppe_", ""))
+        _map50_values.append(_final["metrics/mAP50(B)"][0])
+        _map50_95_values.append(_final["metrics/mAP50-95(B)"][0])
 
-    for _idx, _img_file in enumerate(_comparison_images):
-        # Pre-trained COCO model
-        _results_pretrained = pretrained_model.predict(
-            str(_img_file), conf=CONFIDENCE_THRESHOLD, verbose=False
-        )
-        _img_pretrained = _results_pretrained[0].plot()
-        _img_pretrained_rgb = cv2.cvtColor(_img_pretrained, cv2.COLOR_BGR2RGB)
+    _x = np.arange(len(_run_labels))
+    _width = 0.35
 
-        # Fine-tuned PPE model
-        _results_finetuned = trained_model.predict(
-            str(_img_file), conf=CONFIDENCE_THRESHOLD, verbose=False
-        )
-        _img_finetuned = _results_finetuned[0].plot()
-        _img_finetuned_rgb = cv2.cvtColor(_img_finetuned, cv2.COLOR_BGR2RGB)
+    _ax.bar(_x - _width / 2, _map50_values, _width, label="mAP50", alpha=0.8)
+    _ax.bar(_x + _width / 2, _map50_95_values, _width, label="mAP50-95", alpha=0.8)
 
-        # Display
-        _axes[0, _idx].imshow(_img_pretrained_rgb)
-        _axes[0, _idx].set_title(
-            f"COCO: {len(_results_pretrained[0].boxes)} detections", fontsize=10
-        )
-        _axes[0, _idx].axis("off")
-
-        _axes[1, _idx].imshow(_img_finetuned_rgb)
-        _axes[1, _idx].set_title(
-            f"PPE: {len(_results_finetuned[0].boxes)} detections", fontsize=10
-        )
-        _axes[1, _idx].axis("off")
-
-    _fig.text(
-        0.02,
-        0.75,
-        "Pre-trained\n(COCO)",
-        fontsize=14,
-        weight="bold",
-        va="center",
-        rotation=90,
-    )
-    _fig.text(
-        0.02,
-        0.25,
-        "Fine-tuned\n(PPE)",
-        fontsize=14,
-        weight="bold",
-        va="center",
-        rotation=90,
-    )
+    _ax.set_ylabel("mAP Score")
+    _ax.set_title("Final mAP Comparison Across Runs")
+    _ax.set_xticks(_x)
+    _ax.set_xticklabels(_run_labels, rotation=45, ha="right")
+    _ax.legend()
+    _ax.grid(True, alpha=0.3, axis="y")
 
     plt.tight_layout()
     plt.gca()
@@ -1003,36 +1250,99 @@ def _(
 def _(mo):
     mo.md(
         r"""
-    ## Using the Trained Model
+    ### Metric Explanations
 
-    To use the trained model on new images:
+    **Precision**: What percentage of predicted PPE violations are actually violations. High precision means fewer false alarms.
 
-    ```python
-    from ultralytics import YOLO
+    **Recall**: What percentage of actual violations did we catch. High recall means we don't miss violations.
 
-    # Load trained model
-    model = YOLO("runs/train/ppe_detection/weights/best.pt")
+    **mAP50**: Mean Average Precision at 50% IoU threshold. Measures detection accuracy when bounding boxes overlap at least 50% with ground truth. Standard metric for object detection.
 
-    # Run inference
-    results = model.predict(
-        source="path/to/image.jpg",
-        conf=0.25,
-        save=True,
-        save_txt=True  # Save labels in YOLO format
-    )
+    **mAP50-95**: Average of mAP at IoU thresholds from 50% to 95%. Stricter metric that requires more accurate bounding boxes. Better indicator of overall model quality.
 
-    # Get detections
-    for result in results:
-        boxes = result.boxes
-        for box in boxes:
-            cls = int(box.cls[0])
-            conf = float(box.conf[0])
-            print(f"Detected: {CLASS_NAMES[cls]} (confidence: {conf:.2f})")
-    ```
+    **Box Loss**: How well predicted bounding boxes match ground truth locations. Lower is better.
 
-    The model will save annotated images to `runs/detect/predict/`.
+    **Class Loss**: Cross-entropy loss for object classification. Measures how confidently the model predicts the correct class.
+
+    **DFL Loss**: Distribution Focal Loss for box regression. Helps with more accurate bounding box localization.
     """
     )
+    return
+
+
+@app.cell
+def _(all_runs, mo, pl):
+    comparison_df = pl.DataFrame(
+        {
+            "Run": [name.replace("ppe_", "") for name in sorted(all_runs.keys())],
+            "Precision": [
+                all_runs[name]["results"]["metrics/precision(B)"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "Recall": [
+                all_runs[name]["results"]["metrics/recall(B)"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "mAP50": [
+                all_runs[name]["results"]["metrics/mAP50(B)"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "mAP50-95": [
+                all_runs[name]["results"]["metrics/mAP50-95(B)"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "BoxLoss": [
+                all_runs[name]["results"]["val/box_loss"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+            "ClsLoss": [
+                all_runs[name]["results"]["val/cls_loss"][-1]
+                for name in sorted(all_runs.keys())
+            ],
+        }
+    )
+
+    mo.md(f"""
+    ### Detailed Comparison Table
+
+    {comparison_df}
+    """)
+    return
+
+
+@app.cell
+def _(all_runs, plt):
+    _fig, _axes = plt.subplots(2, 3, figsize=(18, 10))
+    _axes = _axes.flatten()
+
+    _metrics_to_plot = [
+        ("train/box_loss", "Training Box Loss"),
+        ("val/box_loss", "Validation Box Loss"),
+        ("train/cls_loss", "Training Class Loss"),
+        ("val/cls_loss", "Validation Class Loss"),
+        ("train/dfl_loss", "Training DFL Loss"),
+        ("val/dfl_loss", "Validation DFL Loss"),
+    ]
+
+    for _idx, (_metric, _title) in enumerate(_metrics_to_plot):
+        for _name, _data in sorted(all_runs.items()):
+            _results = _data["results"]
+            _axes[_idx].plot(
+                _results["epoch"],
+                _results[_metric],
+                label=_name.replace("ppe_", ""),
+                linewidth=2,
+                alpha=0.7,
+            )
+
+        _axes[_idx].set_xlabel("Epoch")
+        _axes[_idx].set_ylabel("Loss")
+        _axes[_idx].set_title(_title)
+        _axes[_idx].legend(loc="best", fontsize=7)
+        _axes[_idx].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.gca()
     return
 
 
@@ -1040,40 +1350,187 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    ## Troubleshooting
+    ### Confusion Matrices Comparison
 
-    **Q: Training fails with CUDA out of memory**
-    - Reduce BATCH_SIZE in constants cell (try 8, then 4)
-    - Reduce IMAGE_SIZE to 416
-    - Close other GPU-intensive applications
-
-    **Q: Training is very slow**
-    - Check DEVICE is set to GPU (should see "GPU detected" message)
-    - If on CPU, reduce EPOCHS to 10 for faster iteration
-    - Ensure CUDA drivers are properly installed
-
-    **Q: Poor detection performance (low mAP)**
-    - Check class distribution - severe imbalance may need data augmentation
-    - Increase EPOCHS (try 100)
-    - Try larger YOLO models (yolov8s.pt, yolov8m.pt)
-    - Verify dataset labels are correct
-
-    **Q: Model doesn't exist error**
-    - Click "Train Model" button and wait for training to complete
-    - Check that TRAINING_RUN_NAME matches the actual folder in `runs/train/`
-    - Verify TRAINED_MODEL_PATH points to correct location
-
-    **Q: Dataset not found error**
-    - Ensure dataset is extracted to `data/archive/css-data/`
-    - Check directory structure matches expected layout
-    - Verify all splits (train/valid/test) exist
-
-    **Q: Import errors or missing packages**
-    - Run: `uv sync` to install all dependencies
-    - Check that you're using Python 3.13+
-    - Try: `uv add torch` if GPU detection fails
+    Confusion matrices show which classes the model confuses most often.
     """
     )
+    return
+
+
+@app.cell
+def _(mpimg, plt, run_names, runs_dir):
+    _n_runs = len(run_names)
+    _fig, _axes = plt.subplots(_n_runs, 1, figsize=(12, 8 * _n_runs))
+    if _n_runs == 1:
+        _axes = [_axes]
+
+    for _idx, _name in enumerate(sorted(run_names)):
+        _cm_path = runs_dir / _name / "confusion_matrix_normalized.png"
+        if _cm_path.exists():
+            _img = mpimg.imread(str(_cm_path))
+            _axes[_idx].imshow(_img)
+            _axes[_idx].set_title(
+                f"{_name.replace('ppe_', '')} - Confusion Matrix", fontsize=14
+            )
+            _axes[_idx].axis("off")
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Precision-Recall Curves
+
+    Shows the tradeoff between precision and recall at different confidence thresholds.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mpimg, plt, run_names, runs_dir):
+    _n_runs = len(run_names)
+    _fig, _axes = plt.subplots(_n_runs, 1, figsize=(12, 6 * _n_runs))
+    if _n_runs == 1:
+        _axes = [_axes]
+
+    for _idx, _name in enumerate(sorted(run_names)):
+        _pr_path = runs_dir / _name / "BoxPR_curve.png"
+        if _pr_path.exists():
+            _img = mpimg.imread(str(_pr_path))
+            _axes[_idx].imshow(_img)
+            _axes[_idx].set_title(
+                f"{_name.replace('ppe_', '')} - PR Curve", fontsize=14
+            )
+            _axes[_idx].axis("off")
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### F1 Score Curves
+
+    F1 is the harmonic mean of precision and recall. Shows optimal confidence threshold.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mpimg, plt, run_names, runs_dir):
+    _n_runs = len(run_names)
+    _fig, _axes = plt.subplots(_n_runs, 1, figsize=(12, 6 * _n_runs))
+    if _n_runs == 1:
+        _axes = [_axes]
+
+    for _idx, _name in enumerate(sorted(run_names)):
+        _f1_path = runs_dir / _name / "BoxF1_curve.png"
+        if _f1_path.exists():
+            _img = mpimg.imread(str(_f1_path))
+            _axes[_idx].imshow(_img)
+            _axes[_idx].set_title(
+                f"{_name.replace('ppe_', '')} - F1 Curve", fontsize=14
+            )
+            _axes[_idx].axis("off")
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Training Metrics Over Time
+
+    Complete training history for each run.
+    """
+    )
+    return
+
+
+@app.cell
+def _(mpimg, plt, run_names, runs_dir):
+    _n_runs = len(run_names)
+    _cols = 2
+    _rows = (_n_runs + 1) // 2
+    _fig, _axes = plt.subplots(_rows, _cols, figsize=(20, 10 * _rows))
+    _axes = _axes.flatten() if _n_runs > 1 else [_axes]
+
+    for _idx, _name in enumerate(sorted(run_names)):
+        _results_path = runs_dir / _name / "results.png"
+        if _results_path.exists():
+            _img = mpimg.imread(str(_results_path))
+            _axes[_idx].imshow(_img)
+            _axes[_idx].set_title(
+                f"{_name.replace('ppe_', '')}", fontsize=14, weight="bold"
+            )
+            _axes[_idx].axis("off")
+
+    for _idx in range(_n_runs, len(_axes)):
+        _axes[_idx].axis("off")
+
+    plt.tight_layout()
+    plt.gca()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    ### Convergence Analysis
+
+    Checking if models converged or still improving at the end of training.
+    """
+    )
+    return
+
+
+@app.cell
+def _(PrettyTable, TABLES_STYLE, all_runs, mo, np):
+    convergence_table = PrettyTable()
+    convergence_table.field_names = [
+        "Run",
+        "Last 10 Avg mAP",
+        "Best mAP",
+        "Epochs to Best",
+        "Still Improving",
+    ]
+
+    for _name, _data in sorted(all_runs.items()):
+        _results = _data["results"]
+        _map_values = _results["metrics/mAP50-95(B)"].to_numpy()
+        _last_10_avg = np.mean(_map_values[-10:])
+        _best_map = np.max(_map_values)
+        _best_epoch = np.argmax(_map_values) + 1
+        _still_improving = "Yes" if _best_epoch > len(_map_values) - 10 else "No"
+
+        convergence_table.add_row(
+            [
+                _name.replace("ppe_", ""),
+                f"{_last_10_avg:.4f}",
+                f"{_best_map:.4f}",
+                _best_epoch,
+                _still_improving,
+            ]
+        )
+
+    convergence_table.set_style(TABLES_STYLE)
+    mo.md(f"""
+    {convergence_table.get_string()}
+    """)
     return
 
 

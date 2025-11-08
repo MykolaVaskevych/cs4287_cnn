@@ -1,0 +1,21 @@
+{
+  "experiment_id": "dropout",
+  "run_name": "ppe_100_dropout_0.2",
+  "description": "With dropout regularization",
+  "parameters": {
+    "epochs": 100,
+    "lr0": 0.01,
+    "batch": 16,
+    "imgsz": 640,
+    "dropout": 0.2,
+    "mosaic": 1.0
+  },
+  "duration_hours": 0.18110166666666666,
+  "final_metrics": {
+    "mAP50": 0.79909,
+    "mAP50-95": 0.49872,
+    "precision": 0.88603,
+    "recall": 0.73781
+  },
+  "training_completed": "2025-11-07 17:57:31"
+}

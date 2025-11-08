@@ -1,0 +1,670 @@
+2025-11-07 15:46:37.880 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:46:37.880 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:47:47.071 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:47:47.071 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:47:47.071 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:47:47.071 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:47:47.071 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:47:47.071 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:02.850 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:02
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:02
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:02
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:02
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:02
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:02.851 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:30
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:30
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:30
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:30
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:30
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:30.437 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.060 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.061 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:44.061 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:44.061 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:44.061 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:44.061 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:44.061 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.085 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.085 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_high
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_high
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_high
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_high
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_high
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_high
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_small
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_small
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_small
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_small
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_small
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_small
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: Smaller batch size
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: Smaller batch size
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: Smaller batch size
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: Smaller batch size
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: Smaller batch size
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:19 - Description: Smaller batch size
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 8, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 8, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 8, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 8, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 8, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 8, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_small
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_small
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_small
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_small
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_small
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_small
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.086 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_large
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_large
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_large
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_large
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_large
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_large
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: Larger batch size
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: Larger batch size
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: Larger batch size
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: Larger batch size
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: Larger batch size
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: Larger batch size
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 32, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 32, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 32, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 32, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 32, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 32, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_large
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_large
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_large
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_large
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_large
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_large
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: no_augment
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: no_augment
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: no_augment
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: no_augment
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: no_augment
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: no_augment
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: No mosaic augmentation
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: No mosaic augmentation
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: No mosaic augmentation
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: No mosaic augmentation
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: No mosaic augmentation
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: No mosaic augmentation
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 0.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 0.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 0.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 0.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 0.0}
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 0.0}
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: no_augment
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: no_augment
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: no_augment
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: no_augment
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: no_augment
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:105 - ✗ FAILED: no_augment
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: dropout
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: dropout
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: dropout
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: dropout
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: dropout
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:18 - EXPERIMENT: dropout
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: With dropout regularization
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: With dropout regularization
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: With dropout regularization
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: With dropout regularization
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: With dropout regularization
+2025-11-07 15:50:44.087 | INFO     | __main__:<module>:19 - Description: With dropout regularization
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.2, 'mosaic': 1.0}
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.2, 'mosaic': 1.0}
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.2, 'mosaic': 1.0}
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.2, 'mosaic': 1.0}
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.2, 'mosaic': 1.0}
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.2, 'mosaic': 1.0}
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:105 - ✗ FAILED: dropout
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:105 - ✗ FAILED: dropout
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:105 - ✗ FAILED: dropout
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:105 - ✗ FAILED: dropout
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:105 - ✗ FAILED: dropout
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:105 - ✗ FAILED: dropout
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.088 | ERROR    | __main__:<module>:106 - Error: name 'YOLO' is not defined
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:109 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:109 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:109 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:109 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:109 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:109 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:110 - ALL EXPERIMENTS COMPLETED
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:110 - ALL EXPERIMENTS COMPLETED
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:110 - ALL EXPERIMENTS COMPLETED
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:110 - ALL EXPERIMENTS COMPLETED
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:110 - ALL EXPERIMENTS COMPLETED
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:110 - ALL EXPERIMENTS COMPLETED
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:111 - End time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:111 - End time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:111 - End time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:111 - End time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:111 - End time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:111 - End time: 2025-11-07 15:50:44
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:112 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:112 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:112 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:112 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:112 - ================================================================================
+2025-11-07 15:50:44.088 | INFO     | __main__:<module>:112 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:51:08
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:51:08
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:51:08
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:51:08
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:51:08
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:51:08
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 15:51:08
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:51:08.094 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:51:08.095 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 15:51:08.111 | INFO     | __main__:<module>:26 - Training started: 15:51:08
+2025-11-07 15:51:08.111 | INFO     | __main__:<module>:26 - Training started: 15:51:08
+2025-11-07 15:51:08.111 | INFO     | __main__:<module>:26 - Training started: 15:51:08
+2025-11-07 15:51:08.111 | INFO     | __main__:<module>:26 - Training started: 15:51:08
+2025-11-07 15:51:08.111 | INFO     | __main__:<module>:26 - Training started: 15:51:08
+2025-11-07 15:51:08.111 | INFO     | __main__:<module>:26 - Training started: 15:51:08
+2025-11-07 15:51:08.111 | INFO     | __main__:<module>:26 - Training started: 15:51:08
+2025-11-07 16:02:08.245 | INFO     | __main__:<module>:40 - Training completed: 16:02:08
+2025-11-07 16:02:08.245 | INFO     | __main__:<module>:40 - Training completed: 16:02:08
+2025-11-07 16:02:08.245 | INFO     | __main__:<module>:40 - Training completed: 16:02:08
+2025-11-07 16:02:08.245 | INFO     | __main__:<module>:40 - Training completed: 16:02:08
+2025-11-07 16:02:08.245 | INFO     | __main__:<module>:40 - Training completed: 16:02:08
+2025-11-07 16:02:08.245 | INFO     | __main__:<module>:40 - Training completed: 16:02:08
+2025-11-07 16:02:08.245 | INFO     | __main__:<module>:40 - Training completed: 16:02:08
+2025-11-07 16:02:08.246 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 16:02:08.246 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 16:02:08.246 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 16:02:08.246 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 16:02:08.246 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 16:02:08.246 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 16:02:08.246 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 16:02:08.249 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 16:02:08.249 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 16:02:08.250 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:02:08.250 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:02:08.250 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:02:08.250 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:02:08.250 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:02:08.250 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:02:08.250 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:02:08.275 | INFO     | __main__:<module>:26 - Training started: 16:02:08
+2025-11-07 16:02:08.275 | INFO     | __main__:<module>:26 - Training started: 16:02:08
+2025-11-07 16:02:08.275 | INFO     | __main__:<module>:26 - Training started: 16:02:08
+2025-11-07 16:02:08.275 | INFO     | __main__:<module>:26 - Training started: 16:02:08
+2025-11-07 16:02:08.275 | INFO     | __main__:<module>:26 - Training started: 16:02:08
+2025-11-07 16:02:08.275 | INFO     | __main__:<module>:26 - Training started: 16:02:08
+2025-11-07 16:02:08.275 | INFO     | __main__:<module>:26 - Training started: 16:02:08
+2025-11-07 16:07:30.788 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 16:07:30.788 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 16:07:30.788 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 16:07:30.788 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 16:07:30.788 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 16:07:30.788 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 16:07:30.788 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 16:07:30
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 16:07:30
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 16:07:30
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 16:07:30
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 16:07:30
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 16:07:30
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 16:07:30
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 16:07:30.789 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:07:30.790 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:07:30.847 | INFO     | __main__:<module>:26 - Training started: 16:07:30
+2025-11-07 16:07:30.847 | INFO     | __main__:<module>:26 - Training started: 16:07:30
+2025-11-07 16:07:30.847 | INFO     | __main__:<module>:26 - Training started: 16:07:30
+2025-11-07 16:07:30.847 | INFO     | __main__:<module>:26 - Training started: 16:07:30
+2025-11-07 16:07:30.847 | INFO     | __main__:<module>:26 - Training started: 16:07:30
+2025-11-07 16:07:30.847 | INFO     | __main__:<module>:26 - Training started: 16:07:30
+2025-11-07 16:07:30.847 | INFO     | __main__:<module>:26 - Training started: 16:07:30
+2025-11-07 16:15:04.692 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 16:15:04.692 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 16:15:04.692 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 16:15:04
+2025-11-07 16:15:04.692 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 16:15:04.719 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 16:15:04.719 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 16:15:04.719 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:15:04.719 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 16:15:04.719 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 16:15:04.719 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:15:04.752 | INFO     | __main__:<module>:26 - Training started: 16:15:04
+2025-11-07 16:24:02.562 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 16:24:02.562 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 16:24:02.562 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 16:24:02
+2025-11-07 16:24:02.562 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 16:24:02.578 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 16:24:02.578 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 16:24:02.578 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:24:02.578 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_low
+2025-11-07 16:24:02.578 | INFO     | __main__:<module>:19 - Description: Low learning rate
+2025-11-07 16:24:02.578 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.001, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:24:02.611 | INFO     | __main__:<module>:26 - Training started: 16:24:02
+2025-11-07 16:34:57.012 | INFO     | __main__:<module>:40 - Training completed: 16:34:57
+2025-11-07 16:34:57.012 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 16:34:57.013 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 16:34:57.013 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 16:34:57.013 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 16:34:57.013 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 16:34:57.013 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_low
+2025-11-07 16:34:57.013 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 16:34:57.013 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:34:57.013 | INFO     | __main__:<module>:18 - EXPERIMENT: lr_high
+2025-11-07 16:34:57.013 | INFO     | __main__:<module>:19 - Description: High learning rate
+2025-11-07 16:34:57.013 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.02, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:34:57.029 | INFO     | __main__:<module>:26 - Training started: 16:34:57
+2025-11-07 16:45:52.422 | INFO     | __main__:<module>:40 - Training completed: 16:45:52
+2025-11-07 16:45:52.422 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 16:45:52.422 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 16:45:52.423 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 16:45:52.423 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 16:45:52.423 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 16:45:52.423 | ERROR    | __main__:<module>:105 - ✗ FAILED: lr_high
+2025-11-07 16:45:52.423 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 16:45:52.423 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 16:45:52.423 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_small
+2025-11-07 16:45:52.423 | INFO     | __main__:<module>:19 - Description: Smaller batch size
+2025-11-07 16:45:52.423 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 8, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 16:45:52.446 | INFO     | __main__:<module>:26 - Training started: 16:45:52
+2025-11-07 17:00:46.720 | INFO     | __main__:<module>:40 - Training completed: 17:00:46
+2025-11-07 17:00:46.720 | INFO     | __main__:<module>:41 - Duration: 0.25 hours
+2025-11-07 17:00:46.721 | INFO     | __main__:<module>:52 - Final mAP50: 0.8079
+2025-11-07 17:00:46.721 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.5020
+2025-11-07 17:00:46.721 | INFO     | __main__:<module>:54 - Final Precision: 0.8815
+2025-11-07 17:00:46.721 | INFO     | __main__:<module>:55 - Final Recall: 0.7379
+2025-11-07 17:00:46.721 | ERROR    | __main__:<module>:105 - ✗ FAILED: batch_small
+2025-11-07 17:00:46.721 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 17:00:46.721 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 17:00:46.722 | INFO     | __main__:<module>:18 - EXPERIMENT: batch_large
+2025-11-07 17:00:46.722 | INFO     | __main__:<module>:19 - Description: Larger batch size
+2025-11-07 17:00:46.722 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 32, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 1.0}
+2025-11-07 17:00:46.738 | INFO     | __main__:<module>:26 - Training started: 17:00:46
+2025-11-07 17:29:35.019 | INFO     | __main__:<module>:2 - ================================================================================
+2025-11-07 17:29:35.019 | INFO     | __main__:<module>:3 - STARTING HYPERPARAMETER EXPERIMENTS
+2025-11-07 17:29:35.020 | INFO     | __main__:<module>:4 - Start time: 2025-11-07 17:29:35
+2025-11-07 17:29:35.020 | INFO     | __main__:<module>:5 - ================================================================================
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:8 - Device: 0
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:14 - ⏭ Skipping baseline_100 (already exists)
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:14 - ⏭ Skipping lr_low (already exists)
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:14 - ⏭ Skipping lr_high (already exists)
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:14 - ⏭ Skipping batch_small (already exists)
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:14 - ⏭ Skipping batch_large (already exists)
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:18 - EXPERIMENT: no_augment
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:19 - Description: No mosaic augmentation
+2025-11-07 17:29:35.033 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.0, 'mosaic': 0.0}
+2025-11-07 17:29:35.051 | INFO     | __main__:<module>:26 - Training started: 17:29:35
+2025-11-07 17:40:23.855 | INFO     | __main__:<module>:40 - Training completed: 17:40:23
+2025-11-07 17:40:23.855 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 17:40:23.855 | INFO     | __main__:<module>:52 - Final mAP50: 0.8255
+2025-11-07 17:40:23.855 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.5046
+2025-11-07 17:40:23.855 | INFO     | __main__:<module>:54 - Final Precision: 0.9168
+2025-11-07 17:40:23.855 | INFO     | __main__:<module>:55 - Final Recall: 0.7385
+2025-11-07 17:40:23.855 | ERROR    | __main__:<module>:105 - ✗ FAILED: no_augment
+2025-11-07 17:40:23.855 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 17:40:23.856 | INFO     | __main__:<module>:17 - --------------------------------------------------------------------------------
+2025-11-07 17:40:23.856 | INFO     | __main__:<module>:18 - EXPERIMENT: dropout
+2025-11-07 17:40:23.856 | INFO     | __main__:<module>:19 - Description: With dropout regularization
+2025-11-07 17:40:23.856 | INFO     | __main__:<module>:20 - Parameters: {'epochs': 100, 'lr0': 0.01, 'batch': 16, 'imgsz': 640, 'dropout': 0.2, 'mosaic': 1.0}
+2025-11-07 17:40:23.872 | INFO     | __main__:<module>:26 - Training started: 17:40:23
+2025-11-07 17:51:21.216 | INFO     | __main__:<module>:40 - Training completed: 17:51:21
+2025-11-07 17:51:21.216 | INFO     | __main__:<module>:41 - Duration: 0.18 hours
+2025-11-07 17:51:21.217 | INFO     | __main__:<module>:52 - Final mAP50: 0.7991
+2025-11-07 17:51:21.217 | INFO     | __main__:<module>:53 - Final mAP50-95: 0.4987
+2025-11-07 17:51:21.217 | INFO     | __main__:<module>:54 - Final Precision: 0.8860
+2025-11-07 17:51:21.217 | INFO     | __main__:<module>:55 - Final Recall: 0.7378
+2025-11-07 17:51:21.217 | ERROR    | __main__:<module>:105 - ✗ FAILED: dropout
+2025-11-07 17:51:21.217 | ERROR    | __main__:<module>:106 - Error: name 'json' is not defined
+2025-11-07 17:51:21.217 | INFO     | __main__:<module>:109 - ================================================================================
+2025-11-07 17:51:21.217 | INFO     | __main__:<module>:110 - ALL EXPERIMENTS COMPLETED
+2025-11-07 17:51:21.218 | INFO     | __main__:<module>:111 - End time: 2025-11-07 17:51:21
+2025-11-07 17:51:21.218 | INFO     | __main__:<module>:112 - ================================================================================
