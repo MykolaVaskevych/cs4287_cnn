@@ -897,22 +897,22 @@ def _(PrettyTable, TABLES_STYLE, mo, validation_issues):
 @app.cell
 def _(mo, validation_issues):
     _has_issues = any(len(_v) > 0 for _v in validation_issues.values())
-
-    if _has_issues:
-        clean_btn = mo.ui.run_button(label="Clean Dataset")
-        clean_btn
-    else:
-        clean_btn = None
-        mo.md("**Dataset is clean - no issues found**")
+    _total_issues = sum(len(_v) for _v in validation_issues.values())
+    clean_btn = mo.ui.run_button(label="Clean Dataset")
+    clean_btn
     return (clean_btn,)
 
 
 @app.cell
 def _(DATASET_ROOT, Path, clean_btn, mo, validation_issues):
-    mo.stop(
-        clean_btn is None or not clean_btn.value,
-        mo.md("Click button to clean dataset"),
-    )
+    mo.stop(not clean_btn.value)
+
+    _has_issues = any(len(_v) > 0 for _v in validation_issues.values())
+
+    if not _has_issues:
+        mo.md("*Dataset is already clean - no issues to fix*")
+
+    mo.stop(not _has_issues)
 
     _cleaned = {"images": 0, "labels": 0}
 
