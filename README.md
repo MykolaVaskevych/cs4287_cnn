@@ -46,7 +46,7 @@ uv sync
 
 ### 3. Download Dataset
 
-Extract the Construction Site Safety dataset to:
+Extract the [Construction Site Safety](https://www.kaggle.com/datasets/snehilsanyal/construction-site-safety-image-dataset-roboflow) dataset to:
 ```
 data/archive/css-data/
 ├── train/

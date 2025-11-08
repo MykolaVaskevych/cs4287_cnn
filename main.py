@@ -1,44 +1,33 @@
+# Oliver Fitzgerald (22365958) & Mykola Vaskevych (22372199)
+# The code executes to the end without an error
+# Link to third party implmentation used: TODO-Inlude-Link
+
 import marimo
 
 __generated_with = "0.17.2"
 app = marimo.App(width="medium", auto_download=["ipynb"])
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""# Imports""")
-    return
-
-
 @app.cell
 def _():
     import marimo as mo
-    return (mo,)
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell
-def _():
     import random
-    import matplotlib.pyplot as plt
-    import matplotlib.image as mpimg
-    import cv2
-    from pathlib import Path
-    import numpy as np
-    from ultralytics import YOLO
-    import yaml
-    from collections import Counter, defaultdict
-    from bokeh.plotting import figure, show, output_notebook
-    from bokeh.layouts import column
-    from PIL import Image
     import torch
     import math
     import json
     import shutil
+    import cv2
+    import yaml
+    import matplotlib.pyplot as plt
+    import matplotlib.image as mpimg
+    import numpy as np
+    from pathlib import Path
+    from ultralytics import YOLO
+    from collections import Counter, defaultdict
+    from bokeh.plotting import figure, show, output_notebook
+    from bokeh.layouts import column
+    from PIL import Image
+
     return (
         Image,
         Path,
@@ -48,6 +37,7 @@ def _():
         defaultdict,
         figure,
         json,
+        mo,
         mpimg,
         np,
         output_notebook,
@@ -65,14 +55,15 @@ def _(mo):
         r"""
     # CS4287-CNN: Construction Safety Equipment Detection
 
-    **Authors**: MYKOLA VASKEVYCH (22372199), OLIVER FITZGERALD (22365958)
+    **Authors**: MYKOLA VASKEVYCH (22372199), OLIVER FITZGERALD (22365958)<br>
+    **Status**: Code executes to completion: <span style="color: green">YES</span><br>
+    **Third Party Implmentation**: [Ultralytcs YOLO8](https://www.google.com)
 
-    **Status**: Code executes to completion: YES
 
     ## Overview
     This notebook fine-tunes a YOLOv8 nano model to detect Personal Protective Equipment (PPE)
     violations on construction sites. The model identifies safety equipment (hardhats, masks,
-    safety vests) and flags violations when workers lack proper protection.
+    safety vests, etc.) and flags violations when workers lack proper protection.
 
     ## Dataset
     - **Classes**: 10 (Hardhat, Mask, NO-Hardhat, NO-Mask, NO-Safety Vest, Person, Safety Cone, Safety Vest, machinery, vehicle)
@@ -80,11 +71,25 @@ def _(mo):
     - **Splits**: Train/Validation/Test
 
     ## Quick Start
-    1. Ensure dataset is in `data/archive/css-data/` directory
-    2. Run all cells sequentially (training will not start automatically)
-    3. Review dataset statistics and quality
-    4. Click "Train Model" button when ready to train
-    5. Scroll down to see training results and model comparison
+    1. Ensure dataset is in `data/archive/css-data/` directory<br>
+    Data can be dowloaded from the following [kaggle page](https://www.kaggle.com/datasets/snehilsanyal/construction-site-safety-image-dataset-roboflow) in the follwing format:
+    ```
+    data/archive/css-data/
+    ├── train/
+    │   ├── images/
+    │   └── labels/
+    ├── valid/
+    │   ├── images/
+    │   └── labels/
+    └── test/
+        ├── images/
+        └── labels/
+    ```
+
+    3. Run all cells sequentially (training will not start automatically) ????
+    4. Review dataset statistics and quality to get an overview of the data and model
+    5. Click the [Train Model](#training-configuration) when ready to commence train
+    6. Scroll down to see training results and model comparison
     """
     )
     return
@@ -94,10 +99,9 @@ def _(mo):
 def _(mo):
     mo.md(
         r"""
-    # CHECKS & SETTINGS
-    ## NOTE: CHECK CONSTANTS BELOW TO ENSURE CORRECTNESS BEFORE RUNNING THE NOTEBOOK.
-
-    **⚡ Quick Navigation**: [Jump to Train Button](#training-configuration)
+    # Checks & Settings
+    **NOTE**: Training parameters below should be validated before running the notebook for optimal performance.<br>
+    The follwing section contains pre-configured training parameters for everything from training device to dataset locations and configuration of model parameters along with descriptors where appropriate.
     """
     )
     return
@@ -107,25 +111,38 @@ def _(mo):
 def _(mo):
     regenerate_yaml = mo.ui.checkbox(
         label="# Regenerate YAML file (uncheck to skip if file is correct)",
-        value=False,
+        value=False
     )
     regenerate_yaml
     return (regenerate_yaml,)
 
 
 @app.cell
-def _(Path, np, random, torch):
-    # Reproducibility
+def _(Path, mo, np, random, torch):
+    """"
+    Reproducibility
+    This section sets the random seeds used in each library throughout the notebook to allow for randomness while ensuring reproducibility 
+    """
     RANDOM_SEED = 42
     random.seed(RANDOM_SEED)
     np.random.seed(RANDOM_SEED)
     torch.manual_seed(RANDOM_SEED)
 
+    """"
+    Traing Device
+    This section uses PyTorch to detect the best available training device. If a CUDA driver for an NVIDIA GPU is found, that device will be used; otherwise, training will run on the CPU.  
+    You can override this autodetection by setting `DEVICE_OVERRIDE` to your preferred device — e.g., `"cpu"` or `0` for CUDA.
+    """
+    DEVICE_OVERRIDE = None
+
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(RANDOM_SEED)
 
-    # Auto-detect best available device
-    if torch.cuda.is_available():
+    # Auto-detect best available device i.e CPU or CUDA Drivers
+    if DEVICE_OVERRIDE is not None:
+        DEVICE = DEVICE_OVERRIDE
+        print(f"Auto-Detect best device overrided using device: {DEVICE}")
+    elif torch.cuda.is_available():
         DEVICE = 0
         _device_name = torch.cuda.get_device_name(0)
         _vram_gb = torch.cuda.get_device_properties(0).total_memory / 1024**3
@@ -136,10 +153,14 @@ def _(Path, np, random, torch):
         print("⚠ No GPU detected - training will be significantly slower")
         print("Recommended: Reduce EPOCHS to 10 and BATCH_SIZE to 4 for CPU")
 
-    # Dataset paths
+    """"
+    Dataset Paths
+    This section specifies the directories within the project where the dataset and related configuration files are located.  
+    Note: These paths should generally not be modified unless you know what you are doing.
+    """
     DATASET_ROOT = Path.cwd() / "data" / "archive" / "css-data"
     TRAINING_IMAGES_PATH = (DATASET_ROOT / "train" / "images").resolve()
-    SAMPLE = (Path.cwd() / "sample/").resolve() # Tempporary Line Delete
+    SAMPLE_IMAGES = (Path.cwd() / "sample/").resolve()
     TRAINING_LABELS_PATH = (DATASET_ROOT / "train" / "labels").resolve()
     VALIDATION_IMAGES_PATH = (DATASET_ROOT / "valid" / "images").resolve()
     VALIDATION_LABELS_PATH = (DATASET_ROOT / "valid" / "labels").resolve()
@@ -147,7 +168,10 @@ def _(Path, np, random, torch):
     TEST_LABELS_PATH = (DATASET_ROOT / "test" / "labels").resolve()
     YAML_CONFIG_PATH = DATASET_ROOT / "data.yaml"
 
-    # Model paths
+    """
+    Model Paths
+    This section defines the locations of the pre-trained model and the output paths for the model generated during training.
+    """
     PRETRAINED_MODEL_PATH = "yolov8n.pt"
     TRAINING_OUTPUT_DIR = "runs/train"
     TRAINING_RUN_NAME = "ppe_detection4"
@@ -155,15 +179,22 @@ def _(Path, np, random, torch):
         Path(TRAINING_OUTPUT_DIR) / TRAINING_RUN_NAME / "weights" / "best.pt"
     )
 
-    # Training parameters
+    """"
+    Training Parameters
+    Defines the main hyperparameters for model training.
+    Note: May need to be altered depending on hardware specifications for more optimal training times
+    """
     EPOCHS = 100  # Reduce to 10 for quick testing or CPU training
-    IMAGE_SIZE = 640  # YOLO standard input size
+    IMAGE_SIZE = 640  # Standard image size for YOLOv8 and this dataset
     BATCH_SIZE = 16  # Reduce to 4-8 for low VRAM or CPU
 
     # Detection parameters
     CONFIDENCE_THRESHOLD = 0.25  # Minimum confidence for detections (0.0-1.0)
 
-    # Visualization parameters
+    """
+    Dataset Visualization parameters
+    This section defines settings for how dataset samples and annotations are displayed for inspection and analysis.
+    """
     NUM_COMPARISON_IMAGES = 4
     NUM_BASELINE_TEST_SAMPLES = 3
 
@@ -194,6 +225,26 @@ def _(Path, np, random, torch):
         8: (128, 128, 128),  # machinery - Gray
         9: (255, 0, 0),  # vehicle - Blue
     }
+
+
+    """
+    Display configuration summary
+    """
+    mo.md(
+        f"""
+        ## Current Configuration
+
+        | Parameter | Value | Description |
+        |-----------|-------|-------------|
+        | Device | `{DEVICE}` | Training device (0=GPU, 'cpu'=CPU) |
+        | Epochs | `{EPOCHS}` | Training iterations through dataset |
+        | Image Size | `{IMAGE_SIZE}px` | Input resolution |
+        | Batch Size | `{BATCH_SIZE}` | Images per training step |
+        | Confidence | `{CONFIDENCE_THRESHOLD}` | Min score for detections |
+
+        **Note**: Adjust BATCH_SIZE in constants cell if you get OOM (Out of Memory) errors.
+        """
+    )
     return (
         BATCH_SIZE,
         BBOX_COLORS,
@@ -206,7 +257,7 @@ def _(Path, np, random, torch):
         NUM_BASELINE_TEST_SAMPLES,
         NUM_COMPARISON_IMAGES,
         PRETRAINED_MODEL_PATH,
-        SAMPLE,
+        SAMPLE_IMAGES,
         TEST_IMAGES_PATH,
         TRAINED_MODEL_PATH,
         TRAINING_IMAGES_PATH,
@@ -219,17 +270,28 @@ def _(Path, np, random, torch):
 
 
 @app.cell
+def _(mo):
+    mo.md(
+        r"""
+    # Dataset
+    ## Dataset Configuration
+
+    Generates the YOLO-compatible data.yaml configuration file with the parameters defined in the previous seciton.
+    """
+    )
+    return
+
+
+@app.cell
 def _(
-    BATCH_SIZE,
-    CONFIDENCE_THRESHOLD,
+    CLASS_NAMES,
     DATASET_ROOT,
-    DEVICE,
-    EPOCHS,
-    IMAGE_SIZE,
     TEST_IMAGES_PATH,
     TRAINING_IMAGES_PATH,
     VALIDATION_IMAGES_PATH,
+    YAML_CONFIG_PATH,
     mo,
+    regenerate_yaml,
 ):
     # Validate dataset is present and structure is correct
     _missing_paths = []
@@ -255,40 +317,6 @@ def _(
 
     print("✓ All dataset paths validated successfully\n")
 
-    # Display configuration summary
-    mo.md(
-        f"""
-        ## Current Configuration
-
-        | Parameter | Value | Description |
-        |-----------|-------|-------------|
-        | Device | `{DEVICE}` | Training device (0=GPU, 'cpu'=CPU) |
-        | Epochs | `{EPOCHS}` | Training iterations through dataset |
-        | Image Size | `{IMAGE_SIZE}px` | Input resolution |
-        | Batch Size | `{BATCH_SIZE}` | Images per training step |
-        | Confidence | `{CONFIDENCE_THRESHOLD}` | Min score for detections |
-
-        **Note**: Adjust BATCH_SIZE in constants cell if you get OOM (Out of Memory) errors.
-        """
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-    # Dataset
-    ## Dataset Configuration
-
-    Generates the YOLO-compatible data.yaml configuration file
-    """
-    )
-    return
-
-
-@app.cell
-def _(CLASS_NAMES, DATASET_ROOT, YAML_CONFIG_PATH, regenerate_yaml):
     # Generate YAML using CLASS_NAMES constant to ensure consistency
     _names_yaml = "\n  ".join([f"{k}: {v}" for k, v in CLASS_NAMES.items()])
 
@@ -317,9 +345,9 @@ def _(CLASS_NAMES, DATASET_ROOT, YAML_CONFIG_PATH, regenerate_yaml):
 def _(mo):
     mo.md(
         r"""
-    ## Dataset Inspection
+    ## Dataset Distribution
 
-    Examine the distribution of images and labels across train/validation/test splits.
+    Examine the distribution of images and labels across train/validation/test splits and makes any corrections required if the split is not of the desired ratio i.e (80:10:10) across (train:test:valid)
     """
     )
     return
@@ -329,11 +357,9 @@ def _(mo):
 def _(DATASET_ROOT, Path, json, random, shutil):
     print("=" * 50)
     print("DATASET STRUCTURE")
+    print("Re-Structures Dataset to 80:10:10 Train:Test:Validation Split")
     print("=" * 50)
 
-    # Re-Structure Dataset to 80:10:10 Train:Test:Validation Split
-    # File extensionsed that are moved
-    image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'}
 
     class FileGrouping:
         def __init__(self, filePath, labelPath):
@@ -341,6 +367,10 @@ def _(DATASET_ROOT, Path, json, random, shutil):
             self.labelPath = labelPath
 
     class Configuration:
+        """
+        Configuration
+        An object containg relevant information from a passed json configuration file which defines the desired sturcture of the dataset
+        """ 
         def __init__(self,configuration_path):
 
             fileType = configuration_path[len(configuration_path) - 5:]
@@ -378,7 +408,6 @@ def _(DATASET_ROOT, Path, json, random, shutil):
                     - 'target path': Path to the target directory.
                     - 'distribution': Fraction (string or float) of files to move to this target.
         """
-        global image_extensions
 
         # Verify directories exist
         if not all(directory.exists() for directory in configuration.source):
@@ -398,14 +427,13 @@ def _(DATASET_ROOT, Path, json, random, shutil):
             for file_path in directory.rglob('*'):
 
                 relative_path = file_path.relative_to(directory)
-                imagePath = directory / relative_path  # actual image path
+                imagePath = directory / relative_path
                 labelPath = Path(str(imagePath)
                                  .replace('/images/', '/labels/', 1)
                                  .rsplit('.', 1)[0] + '.txt')
 
                 if imagePath.is_file() and labelPath.is_file():
 
-                    # Create FileGrouping object
                     file_grouping = FileGrouping(imagePath, labelPath)
                     all_images.append(file_grouping)
                     count += 1
@@ -424,7 +452,7 @@ def _(DATASET_ROOT, Path, json, random, shutil):
         print(f"\nShuffiling images ...")
         random.shuffle(all_images)
 
-        # Calculate split indices
+        # Re-distribute shuffeled images accross specified split
         print("Moving images...\n")
         for target in configuration.target:
             images = all_images[:round(float(target["distribution"]) * total_images)] 
@@ -443,22 +471,19 @@ def _(DATASET_ROOT, Path, json, random, shutil):
         Moves a list of FileGrouping objects (images and labels) to given target directories
         Args:
             image_list (list): List of FileGrouping objects to be moved
-            target_dir: The base target directory (images go to target_dir/images, labels to target_dir/labels)
+            target_dir: The base target directory the FileGrouping object gets sendt to i.e (the image goes to target_dir/images and the labels go to target_dir/labels)
         """
-        # Create target subdirectories for images and labels
         target_images_dir = target_dir / 'images'
         target_labels_dir = target_dir / 'labels'
 
         for file_grouping in image_list:
             # Move image file
             img_path = file_grouping.filePath
-            target_img_path = target_images_dir / img_path.name
             if img_path.exists() and img_path.parent != target_images_dir:
                 shutil.move(str(img_path), str(target_images_dir))
 
             # Move label file
             label_path = file_grouping.labelPath
-            target_label_path = target_labels_dir / label_path.name
             if label_path.exists() and label_path.parent != target_labels_dir:
                 shutil.move(str(label_path), str(target_labels_dir))
 
@@ -470,7 +495,8 @@ def _(DATASET_ROOT, Path, json, random, shutil):
 
 
 
-    # Examine Datastructure 
+    print()
+    # Finally Examine Resulting Datastructure 
     for _split in ["train", "valid", "test"]:
         _img_path = DATASET_ROOT / _split / "images"
         _label_path = DATASET_ROOT / _split / "labels"
@@ -508,7 +534,7 @@ def _(TRAINING_LABELS_PATH):
     _label_files = list(TRAINING_LABELS_PATH.glob("*.txt"))
     _first_label = _label_files[0]
 
-    print(f"\nSample Label file: {_first_label.name}")
+    print(f"\nSample Label file used: {_first_label.name}")
     print("\nContents (first 10 lines):")
     print("\nFormat: class_id x_center y_center width height")
     with open(_first_label, "r") as _f:
@@ -570,7 +596,7 @@ def _(mo):
         r"""
     ## Sample Images Visualization
 
-    Display training images with ground truth bounding boxes overlaid.
+    Display sample training images with ground truth bounding boxes overlaid.
     """
     )
     return
@@ -634,19 +660,30 @@ def _(cv2):
 
 
 @app.cell
-def _(BBOX_COLORS, CLASS_NAMES, SAMPLE, draw_boxes_on_image, plt):
+def _(
+    BBOX_COLORS,
+    CLASS_NAMES,
+    SAMPLE_IMAGES,
+    TRAINING_IMAGES_PATH,
+    TRAINING_LABELS_PATH,
+    draw_boxes_on_image,
+    plt,
+):
     print("=" * 50)
     print("VISUALIZING SAMPLE IMAGES")
     print("=" * 50)
 
     NUM_SAMPLE_IMAGES = 6 # Minimum == 3
 
-    _image_files = list(SAMPLE.glob("*.jpg"))[:NUM_SAMPLE_IMAGES]
+    """
+    Displays a set number of images with all classes defined from the training set
+    """
+    _image_files = list(TRAINING_IMAGES_PATH.glob("*.jpg"))[:NUM_SAMPLE_IMAGES]
     _fig, _axes = plt.subplots(NUM_SAMPLE_IMAGES // 3, 3, figsize=(15, 10))
     _axes = _axes.flatten()
 
     for _idx, _img_file in enumerate(_image_files):
-        _label_file = SAMPLE / (_img_file.stem + ".txt")
+        _label_file = TRAINING_LABELS_PATH / (_img_file.stem + ".txt")
 
         if _label_file.exists():
             _img_with_boxes = draw_boxes_on_image(
@@ -661,20 +698,31 @@ def _(BBOX_COLORS, CLASS_NAMES, SAMPLE, draw_boxes_on_image, plt):
     plt.tight_layout()
     plt.show()
 
-    # --- Added code (displays each image individually) ---
-    """"
-    for _idx, _img_file in enumerate(_image_files):
-        _label_file = SAMPLE / (_img_file.stem + ".txt")
+
+
+    """
+    Displays an image for each class where that class is isocolated to display an example of how said class appears within an image
+    """
+    _all_image_files = list(SAMPLE_IMAGES.glob("*.jpg"))
+    _fig, _axes = plt.subplots(2, 5, figsize=(20, 8))
+    _axes = _axes.flatten()
+
+    for _idx, _img_file in enumerate(_all_image_files):
+        _label_file = SAMPLE_IMAGES / (_img_file.stem + ".txt")
+    
         if _label_file.exists():
             _img_with_boxes = draw_boxes_on_image(
                 _img_file, _label_file, CLASS_NAMES, BBOX_COLORS
             )
-            plt.figure(figsize=(5, 5))
-            plt.imshow(_img_with_boxes)
-            plt.title(f"Individual View: {_img_file.name}")
-            plt.axis("off")
-            plt.show()
-    """
+            if _idx >= len(_axes):
+                break
+        
+            _axes[_idx].imshow(_img_with_boxes)
+            _axes[_idx].set_title(f"Image: {_img_file.name}", fontsize=10)
+            _axes[_idx].axis("off")
+
+    plt.tight_layout()
+    plt.show()
 
     print("\nLegend:")
     print("  Green: Hardhat, Safety Vest (PPE worn correctly)")
