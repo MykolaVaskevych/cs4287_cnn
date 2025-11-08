@@ -393,6 +393,7 @@ def _(DATASET_ROOT, Path, json, random, shutil):
         all_images = []
         currentDistribution = {}
         for directory in configuration.source:
+            directory = directory / 'images'
             count = 0
             for file_path in directory.rglob('*'):
 
@@ -420,11 +421,11 @@ def _(DATASET_ROOT, Path, json, random, shutil):
             print(f"{" " * 4}{directory} contains {fileCount} files constituting ({fileCount / total_images}) of the full distribution (1.0)")
 
         # Shuffle images randomly
-        print("Shuffiling images ...")
+        print(f"\nShuffiling images ...")
         random.shuffle(all_images)
 
         # Calculate split indices
-        print("\nMoving images...")
+        print("Moving images...\n")
         for target in configuration.target:
             images = all_images[:round(float(target["distribution"]) * total_images)] 
             all_images = all_images[round(float(target["distribution"]) * total_images):] 
@@ -451,14 +452,12 @@ def _(DATASET_ROOT, Path, json, random, shutil):
         for file_grouping in image_list:
             # Move image file
             img_path = file_grouping.filePath
-            print(f"image_path: {img_path}\ntarget_img_path: {target_images_dir}\n")
             target_img_path = target_images_dir / img_path.name
             if img_path.exists() and img_path.parent != target_images_dir:
                 shutil.move(str(img_path), str(target_images_dir))
 
             # Move label file
             label_path = file_grouping.labelPath
-            print(f"label_path: {label_path}\ntarget_img_path: {target_labels_dir}\n")
             target_label_path = target_labels_dir / label_path.name
             if label_path.exists() and label_path.parent != target_labels_dir:
                 shutil.move(str(label_path), str(target_labels_dir))
